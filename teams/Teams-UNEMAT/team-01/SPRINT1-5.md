@@ -342,10 +342,10 @@ N:N  → muitos para muitos
 
 | Relacionamento | Cardinalidade prevista | Justificativa |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Categoria – Livro Digital | 1:N | Uma categoria pode conter vários livros mas cada livro digital só pertence a uma categoria principal. |
+| Usuário- Livro Digital | N:N | m usuário pode pegar vários livros, e um livro pode ser pego por vários usuários. |
+| Livro Digital - Empréstimo | 1:N | O livro digital pode estar em vários emprestimos ao mesmo tempo mas cada registro de emprestimo faz referencia apenas a um livro digital especifico. |
+| Usuário - Dispositivo | 1:N | Um usuário pode ter vários dispositivos vinculados a mesma conta mas cada dispositivo pertence a apenas um usuário. |
 
 ---
 
@@ -353,10 +353,10 @@ N:N  → muitos para muitos
 
 | Tabela | Atributo previsto como FK | Referencia qual tabela? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Livro Digital | Id_categoria | Categoria (Id_categoria) |
+| Emprestimo | Id_usuário | Usuário (Id_usuário) |
+| Emprestimo | Id_livro | Livro digital (Id_livro) |
+| Dispostivo | Id_usuário |Usuário (Id_usuário)  |
 
 > As `FOREIGN KEY` serão implementadas posteriormente. Nesta Sprint, apenas planeje os relacionamentos.
 
@@ -377,11 +377,13 @@ AUTO_INCREMENT
 
 | Tabela | Atributo | Restrição prevista | Motivo |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| Usuário | Id_usuário | PRIMARY KEY, AUTO_INCREMENT | Identifica unicamente cada leitor e gera o código numérico automaticamente a cada novo cadastro.|
+| Usuário | Email | UNIQUE, NOT NULL | Impede que duas contas usem o mesmo endereço de e-mail e garante que o campo nunca fique vazio no login. |
+| Livro Digital | Id_categoria | FOREIGN KEY, NOT NULL | Garante integridade referencial com a tabela Categoria, impedindo cadastrar livros vinculados a gêneros inexistentes. |
+| Emprestimo | Status | DEFAULT 'Ativo', NOT NULL | Define automaticamente o status do empréstimo como "Ativo" assim que a linha é criada, sem exigir preenchimento manual. |
+| Emprestimo | Data_inicio | DEFAULT CURRENT_TIMESTAMP, NOT NULL | Registra de forma automática o momento exato em que o leitor solicitou o acesso ao livro digital. |
+| Dispositivo | Id_usuário | FOREIGN KEY, NOT NULL | Assegura que nenhum aparelho fique órfão no sistema, associando-o obrigatoriamente a uma conta de leitor existente. |
+
 
 ---
 
@@ -401,11 +403,11 @@ Um empréstimo deve possuir uma data de realização.
 
 ### Regras do seu banco
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. Um usuário não pode possuir duas contas cadastradas com o mesmo endereço de e-mail.
+2. Um usuário pode ter no máximo 20 empréstimos com status "Ativo" simultaneamente.
+3. O prazo máximo de duração para qualquer empréstimo digital é fixado em 30 dias a partir da data de início.
+4. Um usuário só pode ter um empréstimo com status "Ativo" por vez para o mesmo livro digital (evita duplicar o mesmo e-book para o mesmo leitor).
+5. O usuário pode devolver um e-book antes do prazo de expiração para liberar espaço em seu limite de leituras ativas.
 
 ---
 
@@ -434,6 +436,46 @@ CLIENTE 1 ───── N PEDIDO
 ```text
 Escreva aqui a estrutura planejada.
 ```
+USUARIO
+├── id_usuario (PK)
+├── nome
+├── email
+├── senha
+└── plano
+
+CATEGORIA
+├── id_categoria (PK)
+├── nome
+└── descricao
+
+LIVRO DIGITAL
+├── id_livro (PK)
+├── titulo
+├── autor
+├── formato
+├── link_arquivo
+└── id_categoria (FK)
+
+EMPRESTIMO
+├── id_emprestimo (PK)
+├── id_usuario (FK)
+├── id_livro (FK)
+├── data_inicio
+├── data_fim
+└── status
+
+DISPOSITIVO
+├── id_dispositivo (PK)
+├── id_usuario (FK)
+├── tipo
+└── nome_dispositivo
+
+RELACIONAMENTOS:
+CATEGORIA 1 ───── N LIVRO_DIGITAL
+USUARIO   1 ───── N EMPRESTIMO
+LIVRO_DIGITAL 1 ───── N EMPRESTIMO
+USUARIO   1 ───── N DISPOSITIVO
+
 
 ---
 
@@ -441,10 +483,11 @@ Escreva aqui a estrutura planejada.
 
 Descreva que tipos de registros deverão existir no banco quando ele for populado.
 
-1. 
-2. 
-3. 
-4. 
+
+1. Exemplos de usuários reais para testes, como 'Raquel Silva' (plano Premium) e 'Carlos Souza' (plano Básico).
+2. Categorias do acervo como 'Suspense', 'Ficção Científica' e 'Romance'.
+3. E-books cadastrados vinculados a essas categorias, como 'Garota Exemplar' (EPUB) e 'Duna' (EPUB).
+4. Registros de empréstimos simulados, associando a usuária Raquel ao livro 'Garota Exemplar' com data de retirada e prazo de devolução de 30 dias.
 
 ---
 
@@ -464,11 +507,11 @@ Quais categorias possuem mais de 5 produtos?
 
 ### Perguntas do seu projeto
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. Quais livros digitais pertencem a uma categoria específica (como "Suspense")?
+2. Quais empréstimos estão atualmente com o status "Ativo" para um determinado usuário?
+3. Quantos empréstimos um usuário especifico já realizou no total na plataforma?
+4. Quais são os títulos mais emprestados em todo o acervo digital?
+5. Quantos e quais dispositivos estão vinculados à conta de cada leitor?
 
 ---
 
@@ -486,24 +529,24 @@ Caso não existam dúvidas:
 
 # 18. Checklist da Sprint 1/5
 
-- [ ] identifiquei o aluno responsável;
-- [ ] defini o tema do banco de dados;
-- [ ] descrevi o sistema;
-- [ ] defini o objetivo do banco;
-- [ ] defini o escopo inicial;
-- [ ] identifiquei pelo menos 4 entidades;
-- [ ] planejei os principais atributos;
-- [ ] defini as chaves primárias previstas;
-- [ ] identifiquei os relacionamentos;
-- [ ] defini as cardinalidades iniciais;
-- [ ] identifiquei possíveis chaves estrangeiras;
-- [ ] planejei restrições de integridade;
-- [ ] defini pelo menos 5 regras de negócio;
-- [ ] fiz um esboço da estrutura do banco;
-- [ ] defini os tipos de dados que futuramente serão cadastrados;
-- [ ] defini pelo menos 5 perguntas que o banco deverá responder;
-- [ ] registrei dúvidas ou decisões pendentes;
-- [ ] revisei o arquivo antes de finalizar.
+- [x] identifiquei o aluno responsável;
+- [x] defini o tema do banco de dados;
+- [x] descrevi o sistema;
+- [x] defini o objetivo do banco;
+- [x] defini o escopo inicial;
+- [x] identifiquei pelo menos 4 entidades;
+- [x] planejei os principais atributos;
+- [x] defini as chaves primárias previstas;
+- [x] identifiquei os relacionamentos;
+- [x] defini as cardinalidades iniciais;
+- [x] identifiquei possíveis chaves estrangeiras;
+- [x] planejei restrições de integridade;
+- [x] defini pelo menos 5 regras de negócio;
+- [x] fiz um esboço da estrutura do banco;
+- [x] defini os tipos de dados que futuramente serão cadastrados;
+- [x] defini pelo menos 5 perguntas que o banco deverá responder;
+- [x] registrei dúvidas ou decisões pendentes;
+- [x] revisei o arquivo antes de finalizar.
 
 ---
 
