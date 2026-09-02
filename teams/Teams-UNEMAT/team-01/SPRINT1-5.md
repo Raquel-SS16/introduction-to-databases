@@ -40,7 +40,7 @@ Nesta Sprint 1/5, o foco é exclusivamente o **planejamento do banco de dados**.
 **Nome escolhido para o banco de dados:**
 
 ```
-
+SKRUBS
 ```
 
 ---
@@ -73,7 +73,7 @@ Alguns exemplos:
 
 ### Tema escolhido
 
-> Biblioteca.
+> Biblioteca online (sentido kindle).
 
 ---
 
@@ -90,33 +90,23 @@ A descrição deve responder:
 
 ### Descrição
 
-> O sistema é uma biblioteca online de livros digitais (estilo Kindle). Ele serve para liberar e controlar o acesso temporário aos e-books, garantindo que o leitor só acerte a leitura pelo tempo permitido do empréstimo.
->
-> Quem usa
+> O sistema é uma biblioteca online de livros digitais (estilo Kindle). Ele serve para liberar e controlar o acesso temporário aos e-books, garantindo que o leitor só acesse a leitura pelo tempo permitido do empréstimo.
 
-Leitores: navegam pelo acervo, pegam livros digitais emprestados e leem nos seus aparelhos.
+ **Quem usa:**
+* **Leitores:** navegam pelo acervo, pegam livros digitais emprestados e leem nos seus aparelhos.
+* **Administrador:** cadastra novos e-books no catálogo e gerencia os acessos dos usuários.
 
-Administrador: cadastra novos e-books no catálogo e gerencia os acessos dos usuários
+**O que precisa ser guardado:**
+* **Usuários:** nome, e-mail, senha e tipo de conta.
+* **Livros digitais:** título, autor, gênero e o link/arquivo do e-book.
+* **Empréstimos:** quem pegou o livro, quando pegou e a data em que o acesso expira.
+* **Aparelhos:** os dispositivos (celular, tablet ou leitor digital) conectados na conta do usuário.
 
->O que precisa ser guardado
-
-Usuários: nome, e-mail, senha e tipo de conta.
-
-Livros digitais: título, autor, gênero e o link/arquivo do e-book.
-
-Empréstimos: quem pegou o livro, quando pegou e a data em que o acesso expira.
-
-Aparelhos: os dispositivos (celular, tablet ou leitor digital) conectados na conta do usuário.
-
->O que o sistema faz
-
-Cadastra, edita e remove livros e usuários.
-
-Permite pesquisar livros por título, autor ou categoria.
-
-Libera o livro digital por um período de dias determinado.
-
-Bloqueia o acesso ao livro assim que o prazo termina.
+**O que o sistema faz:**
+* Cadastra, edita e remove livros e usuários.
+* Permite pesquisar livros por título, autor ou categoria.
+* Libera o livro digital por um período de dias determinado.
+* Bloqueia o acesso ao livro assim que o prazo termina.
 
 ---
 
@@ -291,9 +281,9 @@ Cada tabela deverá possuir uma forma de identificar unicamente seus registros.
 
 | Entidade/Tabela | Chave primária prevista | Justificativa |
 |---|---|---|
-| Usuário | Id_usuario | Identificador numérico inteiro com AUTO_INCREMENT. Garante que cada leitor tenha um código exclusivo no sistema, evitando problemas caso existam pessoas com o mesmo nome ou caso o usuário precise alterar seu e-mail. Nunca se repete. |
-| Livro Digital | Id_livro | Identificador numérico inteiro com AUTO_INCREMENT. Cada e-book cadastrado recebe um código único e imutável, permitindo diferenciar edições ou arquivos com facilidade e sem depender do título, que pode se repetir. |
-| Categoria | Id_categoria | Identificador numérico inteiro com AUTO_INCREMENT. Garante unicidade para cada gênero literário (Suspense, Ficção, Romance), facilitando a criação de filtros e pesquisas rápidas sem risco de duplicidade de registros. |
+| Usuário | Id_usuario | Identificador numérico inteiro com AUTO_INCREMENT. Garante que cada leitor tenha um código exclusivo no sistema, evitando problemas caso existam pessoas com o mesmo nome ou caso o usuário precise alterar seu e-mail. |
+| Livro Digital | Id_livro | Identificador numérico inteiro com AUTO_INCREMENT. Cada e-book cadastrado recebe um código único, permitindo diferenciar edições ou arquivos com facilidade e sem depender do título, que pode se repetir. |
+| Categoria | Id_categoria | Identificador numérico inteiro com AUTO_INCREMENT. Garante unicidade para cada gênero literário (Suspense, Ficção, Romance), facilitando a criação de filtros e pesquisas rápidas. |
 | Emprestimo | Id_emprestimo | Identificador numérico inteiro com AUTO_INCREMENT. Como o mesmo leitor pode pegar o mesmo livro mais de uma vez ao longo do tempo, um identificador próprio e sequencial é essencial para registrar cada transação de acesso de forma isolada e única. |
 | Dispositivo | Id_dispositivo | Identificador numérico inteiro com AUTO_INCREMENT. Permite que um mesmo usuário tenha vários aparelhos cadastrados (ex.: um Kindle e dois celulares) sem conflito, identificando cada aparelho de forma exclusiva. |
 
@@ -434,8 +424,6 @@ CLIENTE 1 ───── N PEDIDO
 ### Esboço do seu banco
 
 ```text
-Escreva aqui a estrutura planejada.
-```
 USUARIO
 ├── id_usuario (PK)
 ├── nome
@@ -475,6 +463,8 @@ CATEGORIA 1 ───── N LIVRO_DIGITAL
 USUARIO   1 ───── N EMPRESTIMO
 LIVRO_DIGITAL 1 ───── N EMPRESTIMO
 USUARIO   1 ───── N DISPOSITIVO
+
+```
 
 
 ---
