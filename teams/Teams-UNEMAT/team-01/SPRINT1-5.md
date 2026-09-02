@@ -90,18 +90,33 @@ A descrição deve responder:
 
 ### Descrição
 
-> Controlar o acervo de livros e o fluxo de empréstimos, evitando perda de livros, atrasos nas devoluções e desorganização na estante.
-> - Os usuários seriam: Bibliotecários e Leitores;
-> - As informações armazenadas:
-> - Livros:Título,autor,ISBN, gênero e status (disponível ou emprestado)
-> - Usuários: Nome, CPF,telefone e E-mail
-> - Empréstimos: Qual usuário pegou, qual o livro, a data de retirada e o prazo de devolução.
+> O sistema é uma biblioteca online de livros digitais (estilo Kindle). Ele serve para liberar e controlar o acesso temporário aos e-books, garantindo que o leitor só acerte a leitura pelo tempo permitido do empréstimo.
 >
-> - O sistema deverá permitir:
-> - Cadastrar, editar e excluir livros e usuários.
-> - Buscar livros por título ou autor.
-> - Registrar a saída (empréstimo) de um livro.
-> - Registrar o retorno (devolução) do livro.
+> Quem usa
+
+Leitores: navegam pelo acervo, pegam livros digitais emprestados e leem nos seus aparelhos.
+
+Administrador: cadastra novos e-books no catálogo e gerencia os acessos dos usuários
+
+>O que precisa ser guardado
+
+Usuários: nome, e-mail, senha e tipo de conta.
+
+Livros digitais: título, autor, gênero e o link/arquivo do e-book.
+
+Empréstimos: quem pegou o livro, quando pegou e a data em que o acesso expira.
+
+Aparelhos: os dispositivos (celular, tablet ou leitor digital) conectados na conta do usuário.
+
+>O que o sistema faz
+
+Cadastra, edita e remove livros e usuários.
+
+Permite pesquisar livros por título, autor ou categoria.
+
+Libera o livro digital por um período de dias determinado.
+
+Bloqueia o acesso ao livro assim que o prazo termina.
 
 ---
 
@@ -111,7 +126,7 @@ Explique qual é o principal objetivo do banco de dados proposto.
 
 ### Objetivo
 
-> O principal objetivo deste banco de dados é centralizar e organizar o controle do acervo e a circulação de livros da biblioteca. Ele visa automatizar o registro de empréstimos e devoluções, evitar perdas e extravios de exemplares, monitorar prazos de entrega e garantir rapidez na consulta de disponibilidade das obras para bibliotecários e leitores.
+> O principal objetivo do banco de dados é gerenciar o acervo de e-books e controlar o acesso temporário dos leitores a esses livros. Ele serve para organizar o catálogo digital, registrar quem pegou qual título e garantir que a permissão de leitura funcione apenas durante o prazo do empréstimo.
 
 ---
 
@@ -123,12 +138,11 @@ Liste as principais funcionalidades ou informações que deverão ser contemplad
 
 ### O banco deverá permitir:
 
-1. Cadastrar e gerenciar livros (título, autor, ISBN, gênero e status de disponibilidade).
-2. Cadastrar e manter os dados dos usuários/leitores (nome, CPF/matrícula, telefone e e-mail).
-3. Registrar empréstimos vinculando um usuário a um exemplar físico, gravando a data de retirada e a data limite de devolução.
-4. Processar devoluções de livros, atualizando automaticamente o status do exemplar de volta para "disponível".
-5. Consultar a disponibilidade de obras e listar empréstimos ativos ou com prazo de devolução vencido.
-
+1. Cadastrar e manter os dados dos usuários (nome, e-mail, senha e tipo de plano).
+2. Cadastrar e organizar o catálogo de e-books com autor, título, categoria e arquivo digital.
+3. Registrar o empréstimo de um livro para o usuário, definindo a data de início e a data final de acesso.
+4. Controlar o prazo de expiração para revogar a permissão de leitura quando o tempo acabar.
+5. Associar os aparelhos de leitura (e-reader, celular, tablet) à conta de cada leitor.
 
 ---
 
@@ -164,11 +178,11 @@ Categoria
 
 | Nº | Entidade | O que representa? |
 |---:|---|---|
-| 1 | Usuario | Representa os leitores cadastrados que realizam os empréstimos (alunos, professores, comunidade). |
-| 2 | Livro | Representa a obra catalogada na biblioteca (título, autor, ISBN, ano de publicação). |
-| 3 | Categoria | Representa o gênero ou classificação temática do livro (ex.: Ficção, Computação, História). |
-| 4 | Exemplar | Representa a cópia física individual de um livro existente no acervo e sua localização na estante. |
-| 5 | Emprestimo | Representa o registro da retirada de um exemplar por um usuário, contendo datas e prazos de devolução. |
+| 1 | Usuario | Representa os leitores cadastrados que realizam os empréstimos. |
+| 2 | Livro_digital | Os e-books disponíveis no acervo para leitura (título, autor, ISBN, ano de publicação). |
+| 3 | Categoria | Representa o gênero ou classificação temática do livro (ex.: Ficção, Fantasia, História). |
+| 4 | Emprestimo | O registro do livro liberado temporariamente para o leitor com prazo de expiração. |
+| 5 | Dispositivo | Os aparelhos (Kindle, celular, tablet) conectados à conta do usuário. |
 
 > 
 
@@ -191,27 +205,27 @@ USUÁRIO
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
 | Id_usuário | Identificador único do usuário (chave primária) | INT | Sim |
-| Nome | Nome completo do leitor | VARCHAR(100) | Sim  |
-| Cpf | Cadastro de Pessoa Física para identificação única | VARCHAR (14)  | Sim  |
-| E-mail | E-mail para contato e avisos de devolução  |VARCHAR (100)  | Sim |
-| Telefone | Número de telefone para contato | VARCHAR (20) | Não |
+| Nome | Nome completo do leitor | VARCHAR(50) | Sim  |
+| Plano | Tipo de assinatura (ex.: Grátis, Premium) | VARCHAR (20)  | Sim  |
+| E-mail | E-mail para contato e avisos de devolução  |VARCHAR (50)  | Sim |
+| Senha | Senha de acesso | VARCHAR (50) | Sim |
 
 ## Entidade 2
 
 **Nome da entidade:**
 
 ```text
-LIVRO
+LIVRO DIGITAL
 
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| Id_livro |Código único do e-book | INT |Sim |
+| Título | Nome do livro | VARCHAR(50) | Sim |
+| Autor | Nome do(s) autor(es) da obra | VARCHAR(50) | Sim |
+| link_arquivo| Endereço do arquivo digital | VARCHAR(50) | Sim |
+| Id_categoria | Código da categoria do livro| INT | Sim |
 
 ## Entidade 3
 
@@ -219,15 +233,16 @@ LIVRO
 
 ```text
 
+CATEGORIA
+
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| Id_categoria  | Código único da categoria | INT | Sim |
+| Nome | Nome do gênero literário | VARCHAR(20) | Sim |
+| Descricao | Breve explicação sobre a categoria | VARCHAR(200) | Não |
+
 
 ## Entidade 4
 
@@ -235,25 +250,38 @@ LIVRO
 
 ```text
 
+EMPRESTIMO
+
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| Id_emprestimo | Código único do empréstimo | INT | Sim |
+| Id_usuário | Código do usuário que pegou o livro | INT | Sim |
+| Id_livro | Código do livro emprestado | INT | Sim |
+| Data_inicio | Data e hora em que liberou o acesso | DATETIME | Sim |
+| Data_fim | Data e hora em que expira o acesso | DATETIME | Sim |
+| Status | Situação atual (Ativo, Expirado, Devolvido) | VARCHAR(20) | Sim |
 
-## Outras entidades
 
-Caso o projeto possua mais de quatro entidades, registre-as abaixo.
+## Entidade 5
 
-| Entidade | Principais atributos |
-|---|---|
-|  |  |
-|  |  |
-|  |  |
+
+**Nome da entidade:**
+
+```text
+
+DISPOSITIVO
+
+```
+| Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
+|---|---|---|---|
+| Id_dispositivo | Código único de controle no banco de dados | INT | Sim |
+| Id_usuário | Código do usuário dono do aparelho | INT | Sim |
+| Tipo | Modelo do aparelho (Kindle, Celular, Tablet) |VARCHAR(50) | Sim |
+| Id_aparelho | Identificador único do aparelho | VARCHAR (20) | Sim |
+
+
 
 ---
 
@@ -263,10 +291,11 @@ Cada tabela deverá possuir uma forma de identificar unicamente seus registros.
 
 | Entidade/Tabela | Chave primária prevista | Justificativa |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Usuário | Id_usuario | Identificador numérico inteiro com AUTO_INCREMENT. Garante que cada leitor tenha um código exclusivo no sistema, evitando problemas caso existam pessoas com o mesmo nome ou caso o usuário precise alterar seu e-mail. Nunca se repete. |
+| Livro Digital | Id_livro | Identificador numérico inteiro com AUTO_INCREMENT. Cada e-book cadastrado recebe um código único e imutável, permitindo diferenciar edições ou arquivos com facilidade e sem depender do título, que pode se repetir. |
+| Categoria | Id_categoria | Identificador numérico inteiro com AUTO_INCREMENT. Garante unicidade para cada gênero literário (Suspense, Ficção, Romance), facilitando a criação de filtros e pesquisas rápidas sem risco de duplicidade de registros. |
+| Emprestimo | Id_emprestimo | Identificador numérico inteiro com AUTO_INCREMENT. Como o mesmo leitor pode pegar o mesmo livro mais de uma vez ao longo do tempo, um identificador próprio e sequencial é essencial para registrar cada transação de acesso de forma isolada e única. |
+| Dispositivo | Id_dispositivo | Identificador numérico inteiro com AUTO_INCREMENT. Permite que um mesmo usuário tenha vários aparelhos cadastrados (ex.: um Kindle e dois celulares) sem conflito, identificando cada aparelho de forma exclusiva. |
 
 Considere:
 
@@ -293,10 +322,10 @@ Produto aparece em Item_Pedido
 
 | Entidade A | Relacionamento | Entidade B |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Categoria | classifica | Livro Digital |
+| Usuario | realiza | Emprestimo |
+| Livro_Digital | disponibilizado em | Emprestimo |
+| Usuario | vincula | Dispositivo |
 |  |  |  |
 
 ---
