@@ -1,7 +1,7 @@
 # SPRINT 1/5 — Planejamento do Banco de Dados
 
 **Disciplina:** Laboratório de Banco de Dados  
-**Data:** 31/08/2026  
+**Data:** 01/09/2026  
 **Modalidade:** Atividade individual  
 
 ---
@@ -35,11 +35,11 @@ Nesta Sprint 1/5, o foco é exclusivamente o **planejamento do banco de dados**.
 
 **Nome completo:**
 
-> Preencha aqui.
+> Raquel Silva Dos Santos.
 
 **Nome escolhido para o banco de dados:**
 
-```text
+```
 
 ```
 
@@ -73,7 +73,7 @@ Alguns exemplos:
 
 ### Tema escolhido
 
-> Escreva aqui.
+> Biblioteca.
 
 ---
 
