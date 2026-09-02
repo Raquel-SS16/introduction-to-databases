@@ -90,7 +90,18 @@ A descrição deve responder:
 
 ### Descrição
 
-> Escreva aqui.
+> Controlar o acervo de livros e o fluxo de empréstimos, evitando perda de livros, atrasos nas devoluções e desorganização na estante.
+> - Os usuários seriam: Bibliotecários e Leitores;
+> - As informações armazenadas:
+> - Livros:Título,autor,ISBN, gênero e status (disponível ou emprestado)
+> - Usuários: Nome, CPF,telefone e E-mail
+> - Empréstimos: Qual usuário pegou, qual o livro, a data de retirada e o prazo de devolução.
+>
+> - O sistema deverá permitir:
+> - Cadastrar, editar e excluir livros e usuários.
+> - Buscar livros por título ou autor.
+> - Registrar a saída (empréstimo) de um livro.
+> - Registrar o retorno (devolução) do livro.
 
 ---
 
@@ -100,7 +111,7 @@ Explique qual é o principal objetivo do banco de dados proposto.
 
 ### Objetivo
 
-> Escreva aqui.
+> O principal objetivo deste banco de dados é centralizar e organizar o controle do acervo e a circulação de livros da biblioteca. Ele visa automatizar o registro de empréstimos e devoluções, evitar perdas e extravios de exemplares, monitorar prazos de entrega e garantir rapidez na consulta de disponibilidade das obras para bibliotecários e leitores.
 
 ---
 
@@ -112,11 +123,12 @@ Liste as principais funcionalidades ou informações que deverão ser contemplad
 
 ### O banco deverá permitir:
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. Cadastrar e gerenciar livros (título, autor, ISBN, gênero e status de disponibilidade).
+2. Cadastrar e manter os dados dos usuários/leitores (nome, CPF/matrícula, telefone e e-mail).
+3. Registrar empréstimos vinculando um usuário a um exemplar físico, gravando a data de retirada e a data limite de devolução.
+4. Processar devoluções de livros, atualizando automaticamente o status do exemplar de volta para "disponível".
+5. Consultar a disponibilidade de obras e listar empréstimos ativos ou com prazo de devolução vencido.
+
 
 ---
 
@@ -139,25 +151,26 @@ Disciplina
 ou:
 
 ```text
-Cliente
-Produto
-Pedido
-Item_Pedido
-Pagamento
+Livro
+Exemplar
+Usuario
+Emprestimo
+Autor
+Categoria
 ```
 
 ### Entidades do seu banco
 
+
 | Nº | Entidade | O que representa? |
 |---:|---|---|
-| 1 |  |  |
-| 2 |  |  |
-| 3 |  |  |
-| 4 |  |  |
-| 5 |  |  |
-| 6 |  |  |
+| 1 | Usuario | Representa os leitores cadastrados que realizam os empréstimos (alunos, professores, comunidade). |
+| 2 | Livro | Representa a obra catalogada na biblioteca (título, autor, ISBN, ano de publicação). |
+| 3 | Categoria | Representa o gênero ou classificação temática do livro (ex.: Ficção, Computação, História). |
+| 4 | Exemplar | Representa a cópia física individual de um livro existente no acervo e sua localização na estante. |
+| 5 | Emprestimo | Representa o registro da retirada de um exemplar por um usuário, contendo datas e prazos de devolução. |
 
-> Como referência para esta atividade, planeje **pelo menos 4 tabelas relacionadas**.
+> 
 
 ---
 
@@ -167,25 +180,28 @@ Para cada entidade, identifique os principais atributos que deverão ser armazen
 
 ## Entidade 1
 
-**Nome da entidade:**
+**Nome da entidade:** 
 
 ```text
+
+USUÁRIO
 
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| Id_usuário | Identificador único do usuário (chave primária) | INT | Sim |
+| Nome | Nome completo do leitor | VARCHAR(100) | Sim  |
+| Cpf | Cadastro de Pessoa Física para identificação única | VARCHAR (14)  | Sim  |
+| E-mail | E-mail para contato e avisos de devolução  |VARCHAR (100)  | Sim |
+| Telefone | Número de telefone para contato | VARCHAR (20) | Não |
 
 ## Entidade 2
 
 **Nome da entidade:**
 
 ```text
+LIVRO
 
 ```
 
