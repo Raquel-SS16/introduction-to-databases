@@ -133,12 +133,17 @@ USE loja_virtual;
 
 ```sql
 -- Copie aqui o código utilizado.
+CREATE DATABASE IF NOT EXISTS series_watchlist_db;
+
+USE series_watchlist_db;
 
 ```
 
 ## Nome definitivo do banco
 
 ```text
+
+series_watchlist_db
 
 ```
 
@@ -173,6 +178,7 @@ preco DECIMAL(10,2)
 ativo BOOLEAN
 descricao TEXT
 ```
+
 
 ## Atenção
 
@@ -210,12 +216,11 @@ CREATE TABLE nome_tabela (
 
 | Nº | Nome da tabela | Finalidade |
 |---:|---|---|
-| 1 |  |  |
-| 2 |  |  |
-| 3 |  |  |
-| 4 |  |  |
-| 5 |  |  |
-| 6 |  |  |
+| 1 | PLATAFORMAS | Armazena os serviços de streaming onde as séries são exibidas. |
+| 2 | USUÁRIO | Armazena os dados cadastrais das pessoas que possuem uma lista de séries. |
+| 3 | SERIE | Catálogo de produções disponíveis com gênero, ano e plataforma vinculada. |
+| 4 | ITEM_WATCHLIST | Tabela associativa que vincula o usuário à série com status, nota e comentário. |
+
 
 ---
 
@@ -246,10 +251,10 @@ Se `PEDIDO` possui uma FK para `CLIENTE`, então `CLIENTE` deve existir antes de
 
 ## Ordem definida para o seu projeto
 
-1. 
-2. 
-3. 
-4. 
+1. PLATAFORMA
+2. USUÁRIO
+3. SERIE
+4. ITEM_WATCHLIST
 5. 
 6. 
 
@@ -275,10 +280,10 @@ id_cliente INT PRIMARY KEY AUTO_INCREMENT
 
 | Tabela | Chave primária | Utiliza `AUTO_INCREMENT`? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| PLATAFORMA| Id_plataforma | Sim |
+| USUARIO | Id_usuario | Sim |
+| SERIE | Id_serie | Sim |
+| ITEM_WATCHLIST | Id_item| Sim |
 
 ---
 
@@ -298,9 +303,10 @@ Não utilize `NOT NULL` indiscriminadamente. A restrição deve refletir uma reg
 
 | Tabela | Campo | Por que é obrigatório? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+|PLATAFORMA  | Nome_plataforma | Uma plataforma não pode existir sem identificação textual. |
+| USUARIO | nome, email, data_cadastro | Dados cadastrais essenciais para identificar a conta e o momento de entrada. |
+| SERIE | titulo, genero, ano_lancamento, id_plataforma | Garantem a consistência mínima do catálogo e a associação a um streaming.  |
+| ITEM_WATCHLIST | id_usuario, id_serie, status_assistindo | É mandatório saber quem favoritou, qual série e qual o estado atual de visualização. |
 
 ---
 
@@ -324,8 +330,10 @@ cpf CHAR(11) NOT NULL UNIQUE
 
 | Tabela | Campo | Por que não pode se repetir? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
+| USUARIO | email | Impede vários cadastros com a mesma conta de e-mail. |
+| PLATAFORMA | nome_plataforma | Evita duplicidade de cadastro para a mesma plataforma de streaming. |
+| ITEM_WATCHLIST | (id_usuario, id_serie) | Garante que um usuário só adicione uma mesma série uma única vez à sua lista. |
+
 
 Caso nenhuma seja necessária, justifique:
 
@@ -353,7 +361,7 @@ status VARCHAR(20) NOT NULL DEFAULT 'ATIVO'
 
 | Tabela | Campo | DEFAULT | Justificativa |
 |---|---|---|---|
-|  |  |  |  |
+| ITEM_WATCHLIST | status_assistindo | Quero Ver | Caso o usuário salve uma série sem definir o status, o sistema assume que ele pretende assisti-la. |
 |  |  |  |  |
 
 Caso não utilize `DEFAULT`, justifique:
@@ -497,13 +505,14 @@ ADD CONSTRAINT uq_nome UNIQUE (novo_campo);
 ## ALTER TABLE utilizado no projeto
 
 ```sql
--- Cole aqui o comando executado.
-
+-- 
+ALTER TABLE serie
+ADD COLUMN pais_origem VARCHAR(50) NULL DEFAULT 'EUA';
 ```
 
 ### Explique a alteração
 
-> Escreva aqui.
+> Adiciona a coluna pais_origem à tabela serie para permitir o registro da nacionalidade da produção, com valor padrão 'EUA'.
 
 ---
 
@@ -529,7 +538,12 @@ DROP TABLE tabela_teste;
 
 ```sql
 -- Cole aqui o teste realizado.
+CREATE TABLE tabela_teste (
+    id_teste INT PRIMARY KEY AUTO_INCREMENT,
+    descricao VARCHAR(50)
+);
 
+DROP TABLE tabela_teste;
 ```
 
 ## Explique a diferença
@@ -546,7 +560,7 @@ e:
 DROP TABLE tabela;
 ```
 
-> Responda aqui.
+> DELETE FROM tabela; é um comando que apaga os dados (registros/linhas) armazenados na tabela, mantendo sua estrutura, colunas e restrições intactas. Já o DROP TABLE tabela; é um comando que elimina toda a estrutura da tabela do banco de dados, excluindo colunas, índices, constraints e os dados juntos de forma definitiva.
 
 ---
 
@@ -717,10 +731,10 @@ Faça isso para cada tabela criada.
 
 | Tabela | `DESCRIBE` executado? | Estrutura correta? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| PLATAFORMA | Sim | Sim |
+| USUARIO | Sim | Sim |
+| SERIE | Sim | Sim |
+| ITEM_WATCHLIST | Sim | Sim |
 
 ---
 
