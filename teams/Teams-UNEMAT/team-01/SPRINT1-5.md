@@ -35,12 +35,14 @@ Nesta Sprint 1/5, o foco é exclusivamente o **planejamento do banco de dados**.
 
 **Nome completo:**
 
-> Raquel Silva Dos Santos.
+> RAQUEL SILVA DOS SANTOS
 
 **Nome escolhido para o banco de dados:**
 
-```
-SKRUBS
+```text
+
+series_watchlist_db
+
 ```
 
 ---
@@ -73,7 +75,7 @@ Alguns exemplos:
 
 ### Tema escolhido
 
-> Biblioteca online (sentido kindle).
+> Catálogo e lista pessoal de séries com notas e status de exibição (estilo Watchlist / Letterboxd de séries).
 
 ---
 
@@ -90,23 +92,13 @@ A descrição deve responder:
 
 ### Descrição
 
-> O sistema é uma biblioteca online de livros digitais (estilo Kindle). Ele serve para liberar e controlar o acesso temporário aos e-books, garantindo que o leitor só acesse a leitura pelo tempo permitido do empréstimo.
+> Usuários precisam de uma forma fácil e centralizada de registrar quais séries estão assistindo, quais já terminaram, dar notas e salvar resenhas curtas.
 
- **Quem usa:**
-* **Leitores:** navegam pelo acervo, pegam livros digitais emprestados e leem nos seus aparelhos.
-* **Administrador:** cadastra novos e-books no catálogo e gerencia os acessos dos usuários.
+**Quem utilizaria:** Pessoas que assistem a séries e gostam de organizar suas maratonas e histórico.
 
-**O que precisa ser guardado:**
-* **Usuários:** nome, e-mail, senha e tipo de conta.
-* **Livros digitais:** título, autor, gênero e o link/arquivo do e-book.
-* **Empréstimos:** quem pegou o livro, quando pegou e a data em que o acesso expira.
-* **Aparelhos:** os dispositivos (celular, tablet ou leitor digital) conectados na conta do usuário.
+**Informações principais:** Dados dos usuários, catálogo de séries, plataformas de streaming onde as séries estão disponíveis e o registro de cada série assistida com nota e status.
 
-**O que o sistema faz:**
-* Cadastra, edita e remove livros e usuários.
-* Permite pesquisar livros por título, autor ou categoria.
-* Libera o livro digital por um período de dias determinado.
-* Bloqueia o acesso ao livro assim que o prazo termina.
+**Operações permitidas:** Cadastrar usuários, cadastrar séries e plataformas, adicionar séries à lista pessoal com nota/comentário e consultar séries por nota ou plataforma..
 
 ---
 
@@ -116,7 +108,7 @@ Explique qual é o principal objetivo do banco de dados proposto.
 
 ### Objetivo
 
-> O principal objetivo do banco de dados é gerenciar o acervo de e-books e controlar o acesso temporário dos leitores a esses livros. Ele serve para organizar o catálogo digital, registrar quem pegou qual título e garantir que a permissão de leitura funcione apenas durante o prazo do empréstimo.
+> Gerenciar um catálogo simples de séries associado a plataformas de streaming e permitir que usuários controlem seu histórico e avaliações em uma única lista personalizada.
 
 ---
 
@@ -128,11 +120,11 @@ Liste as principais funcionalidades ou informações que deverão ser contemplad
 
 ### O banco deverá permitir:
 
-1. Cadastrar e manter os dados dos usuários (nome, e-mail, senha e tipo de plano).
-2. Cadastrar e organizar o catálogo de e-books com autor, título, categoria e arquivo digital.
-3. Registrar o empréstimo de um livro para o usuário, definindo a data de início e a data final de acesso.
-4. Controlar o prazo de expiração para revogar a permissão de leitura quando o tempo acabar.
-5. Associar os aparelhos de leitura (e-reader, celular, tablet) à conta de cada leitor.
+1. Cadastrar usuários com e-mails únicos.
+2. Cadastrar plataformas de streaming (Netflix, Prime Video, HBO Max, etc.).
+3. Cadastrar séries vinculadas à sua plataforma principal.
+4. Adicionar séries à lista do usuário com status ("Quero Ver", "Assistindo", "Finalizada").
+5. Registrar notas (0 a 10) e comentários na própria lista.
 
 ---
 
@@ -155,26 +147,23 @@ Disciplina
 ou:
 
 ```text
-Livro
-Exemplar
-Usuario
-Emprestimo
-Autor
-Categoria
+Cliente
+Produto
+Pedido
+Item_Pedido
+Pagamento
 ```
 
 ### Entidades do seu banco
 
-
 | Nº | Entidade | O que representa? |
 |---:|---|---|
-| 1 | Usuario | Representa os leitores cadastrados que realizam os empréstimos. |
-| 2 | Livro_digital | Os e-books disponíveis no acervo para leitura (título, autor, ISBN, ano de publicação). |
-| 3 | Categoria | Representa o gênero ou classificação temática do livro (ex.: Ficção, Fantasia, História). |
-| 4 | Emprestimo | O registro do livro liberado temporariamente para o leitor com prazo de expiração. |
-| 5 | Dispositivo | Os aparelhos (Kindle, celular, tablet) conectados à conta do usuário. |
+| 1 | Usuário | Pessoa cadastrada que possui uma lista de séries. |
+| 2 | Plataforma | Serviço de streaming onde a série é exibida (ex.: Netflix, Max). |
+| 3 | Serie | Série catalogada no sistema com título, ano e gênero. |
+| 4 | Item_watchlist | Registro que vincula o usuário à série com seu status, nota e comentário. |
 
-> 
+> Como referência para esta atividade, planeje **pelo menos 4 tabelas relacionadas**.
 
 ---
 
@@ -184,94 +173,78 @@ Para cada entidade, identifique os principais atributos que deverão ser armazen
 
 ## Entidade 1
 
-**Nome da entidade:** 
+**Nome da entidade:**
 
 ```text
-
 USUÁRIO
-
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-| Id_usuário | Identificador único do usuário (chave primária) | INT | Sim |
-| Nome | Nome completo do leitor | VARCHAR(50) | Sim  |
-| Plano | Tipo de assinatura (ex.: Grátis, Premium) | VARCHAR (20)  | Sim  |
-| E-mail | E-mail para contato e avisos de devolução  |VARCHAR (50)  | Sim |
-| Senha | Senha de acesso | VARCHAR (50) | Sim |
+| id_usuario | Código identificador do usuário | INT | Sim |
+| nome | Nome completo do usuário | VARCHAR(100) | Sim |
+| email | E-mail de cadastro | VARCHAR(100) | Sim |
+| data_cadastro | Data de criação da conta | DATE | Sim |
+
 
 ## Entidade 2
 
 **Nome da entidade:**
 
 ```text
-LIVRO DIGITAL
+
+PLATAFORMA
 
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-| Id_livro |Código único do e-book | INT |Sim |
-| Título | Nome do livro | VARCHAR(50) | Sim |
-| Autor | Nome do(s) autor(es) da obra | VARCHAR(50) | Sim |
-| link_arquivo| Endereço do arquivo digital | VARCHAR(50) | Sim |
-| Id_categoria | Código da categoria do livro| INT | Sim |
+| Id_plataforma | Código da plataforma | INT| Sim |
+| Nome_plataforma | Nome do streaming (Netflix, Max, etc.) | VARCHAR(50) | Sim |
 
 ## Entidade 3
 
 **Nome da entidade:**
 
 ```text
-
-CATEGORIA
+SERIE
 
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-| Id_categoria  | Código único da categoria | INT | Sim |
-| Nome | Nome do gênero literário | VARCHAR(20) | Sim |
-| Descricao | Breve explicação sobre a categoria | VARCHAR(200) | Não |
-
+| Id_serie | Código identificador da série | INT | sim |
+| Titulo | Título da série | VARCHAR(100) | Sim |
+| Genero | Gênero da serie (Drama, Comédia, Sci-Fi) | VARCHAR(50) | Sim |
+| Ano_lancamento | Ano de estreia da serie | INT | Sim |
+| Id_plataforma | Plataforma onde é exibida (FK) | INT | Sim |
 
 ## Entidade 4
 
 **Nome da entidade:**
 
 ```text
-
-EMPRESTIMO
-
+Item_watchlist
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-| Id_emprestimo | Código único do empréstimo | INT | Sim |
-| Id_usuário | Código do usuário que pegou o livro | INT | Sim |
-| Id_livro | Código do livro emprestado | INT | Sim |
-| Data_inicio | Data e hora em que liberou o acesso | DATETIME | Sim |
-| Data_fim | Data e hora em que expira o acesso | DATETIME | Sim |
-| Status | Situação atual (Ativo, Expirado, Devolvido) | VARCHAR(20) | Sim |
+| Id_item | Identificador do item da lista | INT |Sim  |
+| Id_usuário | Usuário dono da lista (FK) |  INT| Sim |
+| Id_serie | Série adicionada (FK) | INT | Sim |
+| Status_assistindo | Status ("Quero Ver", "Assistindo", "Finalizada") | VARCHAR(20) | Sim |
+| Nota | Nota atribuída pelo usuário (0 a 10) | DECIMAL(3,1) | Não |
+| Comentário | Breve resenha pessoal | VARCHAR(255) | Não |
 
+## Outras entidades
 
-## Entidade 5
+Caso o projeto possua mais de quatro entidades, registre-as abaixo.
 
-
-**Nome da entidade:**
-
-```text
-
-DISPOSITIVO
-
-```
-| Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
-|---|---|---|---|
-| Id_dispositivo | Código único de controle no banco de dados | INT | Sim |
-| Id_usuário | Código do usuário dono do aparelho | INT | Sim |
-| Tipo | Modelo do aparelho (Kindle, Celular, Tablet) |VARCHAR(50) | Sim |
-| Id_aparelho | Identificador único do aparelho | VARCHAR (20) | Sim |
-
-
+| Entidade | Principais atributos |
+|---|---|
+|  |  |
+|  |  |
+|  |  |
 
 ---
 
@@ -281,11 +254,10 @@ Cada tabela deverá possuir uma forma de identificar unicamente seus registros.
 
 | Entidade/Tabela | Chave primária prevista | Justificativa |
 |---|---|---|
-| Usuário | Id_usuario | Identificador numérico inteiro com AUTO_INCREMENT. Garante que cada leitor tenha um código exclusivo no sistema, evitando problemas caso existam pessoas com o mesmo nome ou caso o usuário precise alterar seu e-mail. |
-| Livro Digital | Id_livro | Identificador numérico inteiro com AUTO_INCREMENT. Cada e-book cadastrado recebe um código único, permitindo diferenciar edições ou arquivos com facilidade e sem depender do título, que pode se repetir. |
-| Categoria | Id_categoria | Identificador numérico inteiro com AUTO_INCREMENT. Garante unicidade para cada gênero literário (Suspense, Ficção, Romance), facilitando a criação de filtros e pesquisas rápidas. |
-| Emprestimo | Id_emprestimo | Identificador numérico inteiro com AUTO_INCREMENT. Como o mesmo leitor pode pegar o mesmo livro mais de uma vez ao longo do tempo, um identificador próprio e sequencial é essencial para registrar cada transação de acesso de forma isolada e única. |
-| Dispositivo | Id_dispositivo | Identificador numérico inteiro com AUTO_INCREMENT. Permite que um mesmo usuário tenha vários aparelhos cadastrados (ex.: um Kindle e dois celulares) sem conflito, identificando cada aparelho de forma exclusiva. |
+| Usuario |  Id_usuario | Código numérico sequencial único gerado via AUTO_INCREMENT. |
+| Plataforma | Id_plataforma |Código numérico sequencial único via AUTO_INCREMENT.  |
+| Serie | Id_serie | Identificador numérico único para evitar duplicidade de títulos. |
+| Item_watchlist |Id_item  | Identificador numérico próprio para cada entrada na lista do usuário. |
 
 Considere:
 
@@ -312,11 +284,10 @@ Produto aparece em Item_Pedido
 
 | Entidade A | Relacionamento | Entidade B |
 |---|---|---|
-| Categoria | classifica | Livro Digital |
-| Usuario | realiza | Emprestimo |
-| Livro_Digital | disponibilizado em | Emprestimo |
-| Usuario | vincula | Dispositivo |
-|  |  |  |
+| Plataforma | disponibiliza | serie |
+| usuário | adiciona na lista | item_watchlist |
+| serie | é registrada em | item_watchlist |
+
 
 ---
 
@@ -332,10 +303,10 @@ N:N  → muitos para muitos
 
 | Relacionamento | Cardinalidade prevista | Justificativa |
 |---|---|---|
-| Categoria – Livro Digital | 1:N | Uma categoria pode conter vários livros mas cada livro digital só pertence a uma categoria principal. |
-| Usuário- Livro Digital | N:N | m usuário pode pegar vários livros, e um livro pode ser pego por vários usuários. |
-| Livro Digital - Empréstimo | 1:N | O livro digital pode estar em vários emprestimos ao mesmo tempo mas cada registro de emprestimo faz referencia apenas a um livro digital especifico. |
-| Usuário - Dispositivo | 1:N | Um usuário pode ter vários dispositivos vinculados a mesma conta mas cada dispositivo pertence a apenas um usuário. |
+| Plataforma- serie | 1:N | Uma plataforma pode ter várias series cadastradas. |
+| Usuario - item_watchlist | 1:N | Um usuário pode ter vários registros na lista. |
+| Seri - Item_watchlist | 1:N | Uma serie pode estar na lista de vários usuários. |
+|  |  |  |
 
 ---
 
@@ -343,10 +314,10 @@ N:N  → muitos para muitos
 
 | Tabela | Atributo previsto como FK | Referencia qual tabela? |
 |---|---|---|
-| Livro Digital | Id_categoria | Categoria (Id_categoria) |
-| Emprestimo | Id_usuário | Usuário (Id_usuário) |
-| Emprestimo | Id_livro | Livro digital (Id_livro) |
-| Dispostivo | Id_usuário |Usuário (Id_usuário)  |
+| SERIE | Id_plataforma | Plataforma (id_plataforma) |
+| ITEM_WATCHLIST | Id_usuario | Usuario (Id_usuário) |
+| ITEM_WATCHLIST | Id_serie | Serie (Id_serie) |
+|  |  |  |
 
 > As `FOREIGN KEY` serão implementadas posteriormente. Nesta Sprint, apenas planeje os relacionamentos.
 
@@ -367,13 +338,11 @@ AUTO_INCREMENT
 
 | Tabela | Atributo | Restrição prevista | Motivo |
 |---|---|---|---|
-| Usuário | Id_usuário | PRIMARY KEY, AUTO_INCREMENT | Identifica unicamente cada leitor e gera o código numérico automaticamente a cada novo cadastro.|
-| Usuário | Email | UNIQUE, NOT NULL | Impede que duas contas usem o mesmo endereço de e-mail e garante que o campo nunca fique vazio no login. |
-| Livro Digital | Id_categoria | FOREIGN KEY, NOT NULL | Garante integridade referencial com a tabela Categoria, impedindo cadastrar livros vinculados a gêneros inexistentes. |
-| Emprestimo | Status | DEFAULT 'Ativo', NOT NULL | Define automaticamente o status do empréstimo como "Ativo" assim que a linha é criada, sem exigir preenchimento manual. |
-| Emprestimo | Data_inicio | DEFAULT CURRENT_TIMESTAMP, NOT NULL | Registra de forma automática o momento exato em que o leitor solicitou o acesso ao livro digital. |
-| Dispositivo | Id_usuário | FOREIGN KEY, NOT NULL | Assegura que nenhum aparelho fique órfão no sistema, associando-o obrigatoriamente a uma conta de leitor existente. |
-
+| USUARIO |E-mail  | UNIQUE, NOT NULL | Impede que existam dois usuários com o mesmo e-mail. |
+| PLATAFORMA | Nome_plataforma | UNIQUE, NOT NULL | Evita duplicidade de cadastro da mesma plataforma de streaming. |
+|ITEM_WATCHLIST  | (Id_usuario, Id_serie) | UNIQUE | Garante que o mesmo usuário não cadastre a mesma série mais de uma vez em sua lista. |
+| ITEM_WATCHLIST  | Status_assistindo | DEFAULT 'Quero Ver' | Caso o usuário não especifique, a série entra automaticamente como "Quero Ver". |
+| TODAS | Id_* | PRIMARY KEY, AUTO_INCREMENT | Garante a unicidade e o preenchimento automático das chaves primárias. |
 
 ---
 
@@ -393,11 +362,11 @@ Um empréstimo deve possuir uma data de realização.
 
 ### Regras do seu banco
 
-1. Um usuário não pode possuir duas contas cadastradas com o mesmo endereço de e-mail.
-2. Um usuário pode ter no máximo 20 empréstimos com status "Ativo" simultaneamente.
-3. O prazo máximo de duração para qualquer empréstimo digital é fixado em 30 dias a partir da data de início.
-4. Um usuário só pode ter um empréstimo com status "Ativo" por vez para o mesmo livro digital (evita duplicar o mesmo e-book para o mesmo leitor).
-5. O usuário pode devolver um e-book antes do prazo de expiração para liberar espaço em seu limite de leituras ativas.
+1. Não é permitido cadastrar dois usuários com o mesmo endereço de e-mail.
+2. Cada série só pode ser adicionada uma única vez na lista de um mesmo usuário.
+3. A nota atribuída deve ser um número entre 0 e 10 (ou nula, se o usuário ainda não assistiu).
+4. O status de exibição deve assumir apenas os valores: "Quero Ver", "Assistindo" ou "Finalizada".
+5. Uma série obrigatoriamente deve estar vinculada a uma plataforma cadastrada.
 
 ---
 
@@ -424,48 +393,35 @@ CLIENTE 1 ───── N PEDIDO
 ### Esboço do seu banco
 
 ```text
+PLATAFORMA
+├── id_plataforma (PK)
+└── nome_plataforma
+
+SERIE
+├── id_serie (PK)
+├── titulo
+├── genero
+├── ano_lancamento
+└── id_plataforma (FK)
+
 USUARIO
 ├── id_usuario (PK)
 ├── nome
 ├── email
-├── senha
-└── plano
+└── data_cadastro
 
-CATEGORIA
-├── id_categoria (PK)
-├── nome
-└── descricao
-
-LIVRO DIGITAL
-├── id_livro (PK)
-├── titulo
-├── autor
-├── formato
-├── link_arquivo
-└── id_categoria (FK)
-
-EMPRESTIMO
-├── id_emprestimo (PK)
+ITEM_WATCHLIST
+├── id_item (PK)
 ├── id_usuario (FK)
-├── id_livro (FK)
-├── data_inicio
-├── data_fim
-└── status
+├── id_serie (FK)
+├── status_assistindo
+├── nota
+└── comentario
 
-DISPOSITIVO
-├── id_dispositivo (PK)
-├── id_usuario (FK)
-├── tipo
-└── nome_dispositivo
-
-RELACIONAMENTOS:
-CATEGORIA 1 ───── N LIVRO_DIGITAL
-USUARIO   1 ───── N EMPRESTIMO
-LIVRO_DIGITAL 1 ───── N EMPRESTIMO
-USUARIO   1 ───── N DISPOSITIVO
-
+PLATAFORMA  1 ───── N  SERIE
+USUARIO     1 ───── N  ITEM_WATCHLIST
+SERIE       1 ───── N  ITEM_WATCHLIST
 ```
-
 
 ---
 
@@ -473,11 +429,10 @@ USUARIO   1 ───── N DISPOSITIVO
 
 Descreva que tipos de registros deverão existir no banco quando ele for populado.
 
-
-1. Exemplos de usuários reais para testes, como 'Raquel Silva' (plano Premium) e 'Carlos Souza' (plano Básico).
-2. Categorias do acervo como 'Suspense', 'Ficção Científica' e 'Romance'.
-3. E-books cadastrados vinculados a essas categorias, como 'Garota Exemplar' (EPUB) e 'Duna' (EPUB).
-4. Registros de empréstimos simulados, associando a usuária Raquel ao livro 'Garota Exemplar' com data de retirada e prazo de devolução de 30 dias.
+1. Plataformas de streaming: Netflix, Prime Video, HBO Max, Disney+.
+2. Séries: Títulos como Breaking Bad, Stranger Things, The Last of Us, com gênero e ano de estreia.
+3. Usuários: Perfis de exemplo com nome, e-mail e data de cadastro.
+4. Itens na watchlist: Associações com status (ex.: "Finalizada", "Assistindo"), notas (ex.: 9.5, 8.0) e pequenos comentários de resenha.
 
 ---
 
@@ -497,11 +452,11 @@ Quais categorias possuem mais de 5 produtos?
 
 ### Perguntas do seu projeto
 
-1. Quais livros digitais pertencem a uma categoria específica (como "Suspense")?
-2. Quais empréstimos estão atualmente com o status "Ativo" para um determinado usuário?
-3. Quantos empréstimos um usuário especifico já realizou no total na plataforma?
-4. Quais são os títulos mais emprestados em todo o acervo digital?
-5. Quantos e quais dispositivos estão vinculados à conta de cada leitor?
+1. Quais séries cadastradas pertencem à plataforma "Netflix"?
+2. Qual é a média das notas de cada série calculada a partir das avaliações dos usuários?
+3. Quantas séries cada usuário tem marcadas com o status "Finalizada"?
+4. Quais séries cadastradas são do gênero "Drama" e foram lançadas a partir de 2020?
+5. Qual é o top 3 de séries com as maiores notas médias entre os usuários?
 
 ---
 
@@ -666,3 +621,5 @@ DEFAULT
 ```
 
 > **Não implemente a Sprint 2/5 neste arquivo.**
+
+
