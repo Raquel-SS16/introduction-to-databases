@@ -191,11 +191,20 @@ Ordem recomendada:
 
 ```text
 
+PLATAFORMA
+
 ```
 
 ```sql
 -- Cole aqui os INSERTs realizados.
-
+INSERT INTO plataforma (nome_plataforma)
+VALUES 
+    ('Netflix'),
+    ('HBO Max'),
+    ('Prime Video'),
+    ('Disney+'),
+    ('Apple TV+'),
+    ('Paramount+');
 ```
 
 ## Tabela 2
@@ -204,10 +213,21 @@ Ordem recomendada:
 
 ```text
 
+USUARIO
+
 ```
 
 ```sql
 -- Cole aqui os INSERTs realizados.
+
+INSERT INTO usuario (nome, email, data_cadastro)
+VALUES 
+    ('Lucas Silveira', 'lucas.silveira@email.com', '2024-01-15'),
+    ('Beatriz Lima', 'beatriz.lima@email.com', '2024-02-10'),
+    ('Carlos Eduardo', 'carlos.edu@email.com', '2024-02-28'),
+    ('Mariana Santos', 'mariana.santos@email.com', '2024-03-05'),
+    ('Rafael Souza', 'rafael.souza@email.com', '2024-03-12'),
+    ('Fernanda Costa', 'fernanda.costa@email.com', '2024-03-20');
 
 ```
 
@@ -216,11 +236,22 @@ Ordem recomendada:
 **Nome:**
 
 ```text
-
+SERIE
 ```
 
 ```sql
 -- Cole aqui os INSERTs realizados.
+
+INSERT INTO serie (titulo, genero, ano_lancamento, id_plataforma, pais_origem)
+VALUES 
+    ('Stranger Things', 'Ficção Científica', 2016, 1, 'EUA'),
+    ('The Last of Us', 'Drama / Pós-Apocalíptico', 2023, 2, 'EUA'),
+    ('The Boys', 'Ação / Super-heróis', 2019, 3, 'EUA'),
+    ('The Mandalorian', 'Ficção Científica / Aventura', 2019, 4, 'EUA'),
+    ('Severance', 'Suspense / Ficção Científica', 2022, 5, 'EUA'),
+    ('Dark', 'Ficção Científica / Mistério', 2017, 1, 'Alemanha'),
+    ('Succession', 'Drama', 2018, 2, 'EUA'),
+    ('Serie Cancelada Teste', 'Comédia', 2020, 6, 'EUA');
 
 ```
 
@@ -230,10 +261,26 @@ Ordem recomendada:
 
 ```text
 
+ITEM_WATCHLIST
+
 ```
 
 ```sql
 -- Cole aqui os INSERTs realizados.
+
+INSERT INTO item_watchlist (id_usuario, id_serie, status_assistindo)
+VALUES 
+    (1, 1, 'Concluído'),
+    (1, 2, 'Assistindo'),
+    (1, 5, 'Quero Ver'),
+    (2, 2, 'Concluído'),
+    (2, 6, 'Concluído'),
+    (3, 3, 'Assistindo'),
+    (3, 4, 'Quero Ver'),
+    (4, 1, 'Assistindo'),
+    (4, 7, 'Concluído'),
+    (5, 5, 'Quero Ver'),
+    (6, 8, 'Quero Ver');
 
 ```
 
@@ -327,9 +374,9 @@ Registre os resultados:
 
 | Restrição testada | O que foi testado? | Resultado |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| UNIQUE (email em USUARIO) | Tentativa de inserir um novo usuário utilizando o e-mail 'lucas.silveira@email.com', já existente. | O MySQL bloqueou a inserção retornando erro Error Code: 1062. Duplicate entry 'lucas.silveira@email.com' for key 'usuario.email' |
+| NOT NULL (titulo em SERIE) | Tentativa de inserir uma série omitindo o título ou passando valor explicitamente NULL. | O MySQL bloqueou a operação com o erro Error Code: 1048. Column 'titulo' cannot be null |
+| FOREIGN KEY (id_plataforma em SERIE) | Tentativa de inserir uma série apontando para id_plataforma = 999 (inexistente). | O MySQL bloqueou a inserção com o erro Error Code: 1452. Cannot add or update a child row: a foreign key constraint fails |
 
 > Não mantenha comandos propositalmente inválidos no `SPRINT3-5.sql` final.
 
@@ -392,34 +439,43 @@ Execute pelo menos:
 
 ```sql
 -- Cole aqui.
-
+UPDATE item_watchlist
+SET status_assistindo = 'Concluído'
+WHERE id_usuario = 1 AND id_serie = 2;
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Alterou o status da série de ID 2 (The Last of Us) na lista do usuário de ID 1 de 'Assistindo' para 'Concluído'.
 
 ## UPDATE 2
 
 ```sql
 -- Cole aqui.
+UPDATE usuario
+SET email = 'carlos.eduardo.dev@email.com'
+WHERE id_usuario = 3;
 
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Atualizou o endereço de e-mail corporativo/pessoal do usuário Carlos Eduardo (ID 3).
 
 ## UPDATE 3
 
 ```sql
 -- Cole aqui.
 
+UPDATE serie
+SET genero = 'Drama / Ficção Científica'
+WHERE id_serie = 2;
+
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Refinou a classificação de gênero da série de ID 2 de 'Drama / Pós-Apocalíptico' para 'Drama / Ficção Científica'.
 
 ---
 
@@ -500,22 +556,28 @@ Execute pelo menos:
 ```sql
 -- Cole aqui.
 
+DELETE FROM item_watchlist
+WHERE id_usuario = 6 AND id_serie = 8;
+
 ```
 
 **Registro removido:**
 
-> Escreva aqui.
+> Removeu o vínculo entre o usuário 6 e a série 8 da tabela associativa item_watchlist, simulando o usuário retirando a produção de sua lista pessoal.
 
 ## DELETE 2
 
 ```sql
 -- Cole aqui.
 
+DELETE FROM serie
+WHERE id_serie = 8;
+
 ```
 
 **Registro removido:**
 
-> Escreva aqui.
+> Excluiu o registro da produção 'Serie Cancelada Teste' (ID 8) da tabela serie. Esta exclusão só foi viável e segura porque seu vínculo na tabela filha (item_watchlist) foi previamente removido no DELETE 1, preservando a integridade referencial.
 
 ---
 
@@ -722,10 +784,10 @@ SPRINT3-5.sql
 
 | Tabela | Quantidade aproximada de registros ao final |
 |---|---:|
-|  |  |
-|  |  |
-|  |  |
-|  |  |
+| PLATAFORMA | 6 |
+| USUARIO | 6 |
+| SERIE | 7 |
+| ITEM_WATCHLIST | 10 |
 |  |  |
 
 ---
@@ -738,6 +800,8 @@ Quantidade aproximada de registros inseridos:
 
 ```text
 
+31 registros inseridos no total entre as quatro tabelas.
+
 ```
 
 ## UPDATE
@@ -746,6 +810,8 @@ Quantidade de operações:
 
 ```text
 
+3 operações executadas com sucesso.
+
 ```
 
 ## DELETE
@@ -753,6 +819,8 @@ Quantidade de operações:
 Quantidade de operações:
 
 ```text
+
+2 operações executadas com sucesso.
 
 ```
 
