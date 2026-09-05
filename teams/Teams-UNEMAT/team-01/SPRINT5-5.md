@@ -101,30 +101,34 @@ Verifique se o banco final ainda corresponde ao projeto proposto.
 
 ```text
 
+Catálogo e lista pessoal de séries com notas e status de exibição (estilo Watchlist / Letterboxd de séries).
+
 ```
 
 ## Objetivo principal
 
-> Escreva aqui.
+> Gerenciar um catálogo simples de séries associado a plataformas de streaming e permitir que usuários controlem seu histórico e avaliações em uma única lista personalizada.
+
 
 ## Quantidade final de tabelas
 
 ```text
 
+4 tabelas
+
 ```
 
 ## Principais entidades do banco
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. PLATAFORMA
+2. USUARIO
+3. SERIE
+4. ITEM_WATCHLIST
 
 ## O projeto final permaneceu igual ao planejamento inicial?
 
 - [ ] Sim
-- [ ] Não
+- [x] Não
 
 Caso tenha mudado, explique:
 
@@ -138,10 +142,10 @@ Registre alterações relevantes feitas desde a Sprint 1/5.
 
 | Alteração | Sprint em que ocorreu | Justificativa |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Substituição do ID artificial (id_item) por Chave Primária Composta (id_usuario, id_serie) | Sprint 2/5 | Simplificação relacional da tabela associativa N:N, garantindo naturalmente que o mesmo usuário não repita a mesma série na watchlist. |
+| Inclusão da coluna pais_origem via ALTER TABLE | Sprint 2/5 | Cumprimento do requisito DDL de evolução de schema para permitir rastreio de produções internacionais com valor padrão 'EUA'. |
+|  Adição de restrição CHECK em notas (0 a 10) | Sprint 2/5 | Proteção no nível de banco para garantir consistência às regras de negócio definidas na Sprint 1. |
+
 
 Caso não tenha ocorrido alteração:
 
@@ -164,10 +168,10 @@ Preencha:
 
 | Tabela | PK correta? | FKs corretas? | Tipos corretos? | Restrições corretas? |
 |---|---|---|---|---|
-|  |  |  |  |  |
-|  |  |  |  |  |
-|  |  |  |  |  |
-|  |  |  |  |  |
+| PLATAFORMA | Sim (id_plataforma) | N/A (Independente) | Sim (INT, VARCHAR) | Sim (NOT NULL, UNIQUE) |
+| USUARIO | Sim (id_usuario) | N/A (Independente) | Sim (INT, VARCHAR, DATE) | Sim (NOT NULL, UNIQUE) |
+| SERIE | Sim (id_serie) | Sim (id_plataforma) | Sim (INT, VARCHAR) | Sim (NOT NULL) |
+| ITEM_WATCHLIST | Sim (id_usuario, id_serie) | Sim (id_usuario, id_serie) | Sim (INT, VARCHAR, DECIMAL) | Sim (NOT NULL, DEFAULT, CHECK) |
 |  |  |  |  |  |
 
 ---
@@ -178,10 +182,10 @@ Liste as chaves primárias finais.
 
 | Tabela | PRIMARY KEY | AUTO_INCREMENT? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| PLATAFORMA | id_plataforma | Sim |
+| USUARIO | id_usuario | Sim |
+| SERIE | id_serie | Sim |
+| ITEM_WATCHLIST | (id_usuario, id_serie) | Não (Chave Composta) |
 
 Verifique se cada registro pode ser identificado de forma única.
 
@@ -193,9 +197,9 @@ Liste as chaves estrangeiras finais.
 
 | Tabela | FOREIGN KEY | Tabela referenciada | Campo referenciado |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| SERIE | id_plataforma | PLATAFORMA | id_plataforma |
+| ITEM_WATCHLIST | id_usuario | USUARIO | id_usuario |
+| ITEM_WATCHLIST | id_serie | SERIE | id_serie |
 |  |  |  |  |
 
 Confira se:
@@ -225,10 +229,10 @@ Registre exemplos:
 
 | Tabela | Campo | Restrição | Regra de negócio protegida |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| USUARIO | email | UNIQUE | Impede cadastros duplicados com o mesmo endereço eletrônico. |
+| PLATAFORMA | nome_plataforma | UNIQUE | Impede o cadastramento duplicado de uma mesma plataforma de streaming. |
+| ITEM_WATCHLIST | status_assistindo | DEFAULT 'Quero Ver' | Define o estado inicial da produção na lista caso o usuário não informe. |
+| ITEM_WATCHLIST | nota | CHECK (nota >= 0 AND nota <= 10) | Garante que as notas inseridas permaneçam na escala numérica permitida. |
 
 ---
 
@@ -240,10 +244,10 @@ Preencha:
 
 | Tabela | Quantidade aproximada de registros |
 |---|---:|
-|  |  |
-|  |  |
-|  |  |
-|  |  |
+| PLATAFORMA | 6 |
+| USUARIO | 6 |
+| SERIE | 7 (8 inseridos, 1 excluído controladamente) |
+| ITEM_WATCHLIST | 10 (11 inseridos, 1 excluído controladamente) |
 |  |  |
 
 Pergunte:
@@ -260,12 +264,12 @@ Pergunte:
 
 Confirme:
 
-- [ ] os INSERTs executam sem erro;
-- [ ] respeitam as chaves estrangeiras;
-- [ ] não existem duplicações indevidas;
-- [ ] respeitam `NOT NULL`;
-- [ ] respeitam `UNIQUE`;
-- [ ] os dados fazem sentido no domínio.
+- [X] os INSERTs executam sem erro;
+- [X] respeitam as chaves estrangeiras;
+- [X] não existem duplicações indevidas;
+- [X] respeitam `NOT NULL`;
+- [X] respeitam `UNIQUE`;
+- [X] os dados fazem sentido no domínio.
 
 Caso encontre problemas, registre:
 
@@ -280,15 +284,27 @@ Caso encontre problemas, registre:
 
 Confirme:
 
-- [ ] os UPDATEs possuem `WHERE`;
-- [ ] alteram os registros esperados;
-- [ ] não modificam toda a tabela acidentalmente;
-- [ ] mantêm a integridade do banco.
+- [X] os UPDATEs possuem `WHERE`;
+- [X] alteram os registros esperados;
+- [X] não modificam toda a tabela acidentalmente;
+- [X] mantêm a integridade do banco.
 
 Liste os principais UPDATEs finais:
 
 ```sql
 -- Cole aqui os UPDATEs mais importantes.
+
+UPDATE item_watchlist
+SET status_assistindo = 'Concluído'
+WHERE id_usuario = 1 AND id_serie = 2;
+
+UPDATE usuario
+SET email = 'carlos.eduardo.dev@email.com'
+WHERE id_usuario = 3;
+
+UPDATE serie
+SET genero = 'Drama / Ficção Científica'
+WHERE id_serie = 2;
 
 ```
 
@@ -298,15 +314,21 @@ Liste os principais UPDATEs finais:
 
 Confirme:
 
-- [ ] os DELETEs possuem `WHERE`;
-- [ ] não removem registros necessários ao funcionamento do projeto;
-- [ ] respeitam as dependências de `FOREIGN KEY`;
-- [ ] não comprometem consultas posteriores.
+- [X] os DELETEs possuem `WHERE`;
+- [X] não removem registros necessários ao funcionamento do projeto;
+- [X] respeitam as dependências de `FOREIGN KEY`;
+- [X] não comprometem consultas posteriores.
 
 Liste os DELETEs finais:
 
 ```sql
 -- Cole aqui.
+
+DELETE FROM item_watchlist
+WHERE id_usuario = 6 AND id_serie = 8;
+
+DELETE FROM serie
+WHERE id_serie = 8;
 
 ```
 
@@ -333,15 +355,15 @@ Preencha:
 
 | Recurso SQL | Possui consulta válida? | Pergunta respondida |
 |---|---|---|
-| SELECT |  |  |
-| WHERE |  |  |
-| ORDER BY |  |  |
-| COUNT |  |  |
-| SUM |  |  |
-| AVG |  |  |
-| MIN/MAX |  |  |
-| GROUP BY |  |  |
-| HAVING |  |  |
+| SELECT | Sim | Projeção com apelidos de títulos e anos no catálogo. |
+| WHERE | Sim | Séries da plataforma Netflix / Séries de Drama a partir de 2020. |
+| ORDER BY | Sim | Catálogo ordenado por ano de lançamento e título alfabético. |
+| COUNT | Sim | Total de séries concluídas por usuário na watchlist. |
+| SUM | Sim | Somatório geral dos pontos atribuídos em resenhas válidas. |
+| AVG | Sim | Média de notas avaliadas de cada título. |
+| MIN/MAX | Sim | Menor e maior pontuação registradas na base. |
+| GROUP BY | Sim | Agrupamento de notas por série e contagem por usuário. |
+| HAVING | Sim | Séries com média final de excelência (nota >= 9.0). |
 
 ---
 
@@ -351,33 +373,42 @@ Retome as perguntas definidas inicialmente.
 
 ## Pergunta 1
 
-> Escreva aqui.
+> Quais séries cadastradas pertencem à plataforma "Netflix"?
 
 **Foi respondida?**
 
-- [ ] Sim
+- [x] Sim
 - [ ] Não
 
 **Consulta utilizada:**
 
 ```sql
 -- Cole aqui.
-
+SELECT id_serie, titulo, genero, ano_lancamento
+FROM serie
+WHERE id_plataforma = 1;
 ```
 
 ---
 
 ## Pergunta 2
 
-> Escreva aqui.
+> Qual é a média das notas de cada série calculada a partir das avaliações dos usuários?
 
 **Foi respondida?**
 
-- [ ] Sim
+- [x] Sim
 - [ ] Não
 
 ```sql
 -- Cole aqui.
+SELECT 
+    id_serie,
+    ROUND(AVG(nota), 2) AS media_notas,
+    COUNT(nota) AS volume_avaliacoes
+FROM item_watchlist
+WHERE nota IS NOT NULL
+GROUP BY id_serie;
 
 ```
 
@@ -385,15 +416,21 @@ Retome as perguntas definidas inicialmente.
 
 ## Pergunta 3
 
-> Escreva aqui.
+> Quantas séries cada usuário tem marcadas com o status "Finalizada" (registrado como 'Concluído')?
 
 **Foi respondida?**
 
-- [ ] Sim
+- [x] Sim
 - [ ] Não
 
 ```sql
 -- Cole aqui.
+SELECT 
+    id_usuario, 
+    COUNT(*) AS total_concluidas
+FROM item_watchlist
+WHERE status_assistindo = 'Concluído'
+GROUP BY id_usuario;
 
 ```
 
@@ -401,15 +438,19 @@ Retome as perguntas definidas inicialmente.
 
 ## Pergunta 4
 
-> Escreva aqui.
+> Quais séries cadastradas são do gênero "Drama" e foram lançadas a partir de 2020?
 
 **Foi respondida?**
 
-- [ ] Sim
+- [x] Sim
 - [ ] Não
 
 ```sql
 -- Cole aqui.
+SELECT titulo, genero, ano_lancamento, pais_origem
+FROM serie
+WHERE genero LIKE '%Drama%' 
+  AND ano_lancamento >= 2020;
 
 ```
 
@@ -417,15 +458,25 @@ Retome as perguntas definidas inicialmente.
 
 ## Pergunta 5
 
-> Escreva aqui.
+> Qual é o top 3 de séries com as maiores notas médias entre os usuários?
 
 **Foi respondida?**
 
-- [ ] Sim
+- [x] Sim
 - [ ] Não
 
 ```sql
 -- Cole aqui.
+SELECT 
+    id_serie,
+    ROUND(AVG(nota), 2) AS media_final,
+    COUNT(nota) AS total_avaliacoes
+FROM item_watchlist
+WHERE nota IS NOT NULL
+GROUP BY id_serie
+ORDER BY media_final DESC
+LIMIT 3;
+
 
 ```
 
@@ -624,16 +675,17 @@ Confira se todas as tabelas aparecem.
 Quantidade de tabelas:
 
 ```text
+4
 
 ```
 
 Quantidade encontrada:
 
 ```text
-
+4
 ```
 
-- [ ] corresponde ao esperado.
+- [x] corresponde ao esperado.
 
 ---
 
@@ -687,6 +739,7 @@ Registre:
 ### Tabela testada
 
 ```text
+SERIE
 
 ```
 
@@ -694,11 +747,13 @@ Registre:
 
 ```text
 
+fk_serie_plataforma (FOREIGN KEY)
+
 ```
 
 ### Resultado
 
-> Escreva aqui.
+> A tentativa de inserir uma série com id_plataforma = 999 disparou o erro Error Code: 1452: Cannot add or update a child row: a foreign key constraint fails, comprovando a integridade referencial ativa.
 
 > Comandos propositalmente inválidos não devem permanecer ativos no SQL final. Caso queira documentá-los, mantenha-os comentados.
 
@@ -712,11 +767,13 @@ Caso exista uma restrição `UNIQUE`, teste seu funcionamento.
 
 ```text
 
+usuario.email
+
 ```
 
 ### Resultado
 
-> Escreva aqui.
+> A tentativa de cadastrar um segundo usuário utilizando um e-mail já existente gerou o erro Error Code: 1062: Duplicate entry for key 'usuario.uq_usuario_email', bloqueando a duplicidade.
 
 ---
 
@@ -728,12 +785,13 @@ Caso exista `NOT NULL`, verifique se a restrição funciona.
 
 ```text
 
+serie.titulo
+
 ```
 
 ### Resultado
 
-> Escreva aqui.
-
+> A tentativa de gravar uma série com o campo titulo nulo resultou no erro Error Code: 1048: Column 'titulo' cannot be null.
 ---
 
 # 25. Testando consultas
@@ -755,22 +813,32 @@ Escolha a consulta que melhor demonstra a utilidade do seu banco.
 
 ### Pergunta
 
-> Escreva aqui.
+> Qual é o top 3 de séries com as maiores notas médias entre os usuários?
 
 ### SQL
 
 ```sql
 -- Cole aqui.
 
+SELECT 
+    id_serie,
+    ROUND(AVG(nota), 2) AS media_final,
+    COUNT(nota) AS total_avaliacoes
+FROM item_watchlist
+WHERE nota IS NOT NULL
+GROUP BY id_serie
+ORDER BY media_final DESC
+LIMIT 3;
+
 ```
 
 ### Resultado esperado
 
-> Escreva aqui.
+> Exibição consolidada dos três títulos mais aclamados pelo público no sistema, com média calculada e volume de avaliações.
 
 ### Por que essa consulta é importante?
 
-> Escreva aqui.
+> Representa o propósito central de uma plataforma de catálogo comunitário (recomen
 
 ---
 
@@ -778,28 +846,37 @@ Escolha a consulta que melhor demonstra a utilidade do seu banco.
 
 ### Pergunta
 
-> Escreva aqui.
+> Entre as séries avaliadas, quais obtiveram média de aprovação excelente (nota média maior ou igual a 9.0)?
 
 ### SQL
 
 ```sql
 -- Cole aqui.
 
+SELECT 
+    id_serie,
+    ROUND(AVG(nota), 2) AS media_notas,
+    COUNT(nota) AS total_avaliacoes
+FROM item_watchlist
+WHERE nota IS NOT NULL
+GROUP BY id_serie
+HAVING AVG(nota) >= 9.0;
+
 ```
 
 ### Conceitos utilizados
 
-- [ ] WHERE
-- [ ] ORDER BY
-- [ ] agregação
-- [ ] GROUP BY
-- [ ] HAVING
-- [ ] expressão
-- [ ] outro
+- [X] WHERE
+- [X] ORDER BY
+- [X] agregação
+- [X] GROUP BY
+- [X] HAVING
+- [X] expressão
+- [X] outro
 
 ### Explique
 
-> Escreva aqui.
+>A consulta exige filtrar as linhas que ainda não possuem nota via WHERE, agrupar os dados por identificador de série (GROUP BY), aplicar a função agregada AVG(nota) e filtrar os grupos pós-cálculo com a cláusula HAVING.
 
 ---
 
@@ -807,21 +884,21 @@ Escolha a consulta que melhor demonstra a utilidade do seu banco.
 
 | Teste | Resultado | Correção necessária? |
 |---|---|---|
-| CREATE DATABASE |  |  |
-| CREATE TABLE |  |  |
-| PRIMARY KEY |  |  |
-| FOREIGN KEY |  |  |
-| NOT NULL |  |  |
-| UNIQUE |  |  |
-| INSERT |  |  |
-| UPDATE |  |  |
-| DELETE |  |  |
-| SELECT |  |  |
-| WHERE |  |  |
-| ORDER BY |  |  |
-| GROUP BY |  |  |
-| HAVING |  |  |
-| funções de agregação |  |  |
+| CREATE DATABASE | Executado com sucesso | Não |
+| CREATE TABLE | 4 tabelas criadas | Não |
+| PRIMARY KEY | Chaves simples e composta ativas | Não |
+| FOREIGN KEY | 3 relacionamentos validados | Não |
+| NOT NULL | Campos obrigatórios consistentes | Não |
+| UNIQUE | E-mail e Nome da Plataforma protegidos | Não |
+| INSERT | 31 registros populados | Não |
+| UPDATE | 3 operações executadas com WHERE | Não |
+| DELETE | 2 exclusões executadas na ordem pai/filho |  Não|
+| SELECT | Projeções funcionando | Não|
+| WHERE | Filtros simples e compostos validados | Não |
+| ORDER BY | Ordenação decrescente/crescente ativa | Não |
+| GROUP BY | Grupos calculados com sucesso | Não |
+| HAVING | Filtro pós-agregação funcional | Não |
+| funções de agregação | COUNT, SUM, AVG, MIN, MAX validados | Não |
 
 ---
 
@@ -981,18 +1058,18 @@ Conclui Sprint 5 de 5 - validação final
 
 Confirme:
 
-- [ ] estou na minha branch individual;
-- [ ] todos os commits foram enviados ao GitHub;
-- [ ] não alterei arquivos de outro aluno;
-- [ ] não alterei arquivos de outra instituição;
-- [ ] não alterei arquivos administrativos do repositório;
-- [ ] os 9 arquivos da atividade estão presentes;
-- [ ] os arquivos `.md` estão preenchidos;
-- [ ] os arquivos `.sql` foram testados;
-- [ ] o `SPRINT5-5.sql` executa do início ao fim;
-- [ ] removi nomes genéricos dos modelos;
-- [ ] não deixei senhas ou credenciais;
-- [ ] compreendo o código entregue.
+- [X] estou na minha branch individual;
+- [X] todos os commits foram enviados ao GitHub;
+- [X] não alterei arquivos de outro aluno;
+- [X] não alterei arquivos de outra instituição;
+- [X] não alterei arquivos administrativos do repositório;
+- [X] os 9 arquivos da atividade estão presentes;
+- [X] os arquivos `.md` estão preenchidos;
+- [X] os arquivos `.sql` foram testados;
+- [X] o `SPRINT5-5.sql` executa do início ao fim;
+- [X] removi nomes genéricos dos modelos;
+- [X] não deixei senhas ou credenciais;
+- [X] compreendo o código entregue.
 
 ---
 
@@ -1153,56 +1230,56 @@ A validação automática é parte do processo de entrega.
 
 ## Banco
 
-- [ ] `CREATE DATABASE` funciona;
-- [ ] `USE` funciona;
-- [ ] todas as tabelas são criadas;
-- [ ] nenhuma tabela necessária está ausente.
+- [X] `CREATE DATABASE` funciona;
+- [X] `USE` funciona;
+- [X] todas as tabelas são criadas;
+- [X] nenhuma tabela necessária está ausente.
 
 ## Estrutura
 
-- [ ] todas as tabelas possuem PK;
-- [ ] FKs estão corretas;
-- [ ] tipos de dados estão coerentes;
-- [ ] `NOT NULL` está coerente;
-- [ ] `UNIQUE` está coerente;
-- [ ] `DEFAULT` está coerente.
+- [X] todas as tabelas possuem PK;
+- [X] FKs estão corretas;
+- [X] tipos de dados estão coerentes;
+- [X] `NOT NULL` está coerente;
+- [X] `UNIQUE` está coerente;
+- [X] `DEFAULT` está coerente.
 
 ## Dados
 
-- [ ] INSERTs funcionam;
-- [ ] dados são coerentes;
-- [ ] FKs são respeitadas.
+- [X] INSERTs funcionam;
+- [X] dados são coerentes;
+- [X] FKs são respeitadas.
 
 ## Manipulação
 
-- [ ] UPDATEs funcionam;
-- [ ] UPDATEs possuem `WHERE`;
-- [ ] DELETEs funcionam;
-- [ ] DELETEs possuem `WHERE`.
+- [X] UPDATEs funcionam;
+- [X] UPDATEs possuem `WHERE`;
+- [X] DELETEs funcionam;
+- [X] DELETEs possuem `WHERE`.
 
 ## Consultas
 
-- [ ] SELECT funciona;
-- [ ] WHERE funciona;
-- [ ] ORDER BY funciona;
-- [ ] COUNT funciona;
-- [ ] SUM funciona quando aplicável;
-- [ ] AVG funciona quando aplicável;
-- [ ] MIN/MAX funcionam;
-- [ ] GROUP BY funciona;
-- [ ] HAVING funciona.
+- [X] SELECT funciona;
+- [X] WHERE funciona;
+- [X] ORDER BY funciona;
+- [X] COUNT funciona;
+- [X] SUM funciona quando aplicável;
+- [X] AVG funciona quando aplicável;
+- [X] MIN/MAX funcionam;
+- [X] GROUP BY funciona;
+- [X] HAVING funciona.
 
 ## Arquivos
 
-- [ ] `SPRINT1-5.md`;
-- [ ] `SPRINT2-5.md`;
-- [ ] `SPRINT2-5.sql`;
-- [ ] `SPRINT3-5.md`;
-- [ ] `SPRINT3-5.sql`;
-- [ ] `SPRINT4-5.md`;
-- [ ] `SPRINT4-5.sql`;
-- [ ] `SPRINT5-5.md`;
-- [ ] `SPRINT5-5.sql`.
+- [X] `SPRINT1-5.md`;
+- [X] `SPRINT2-5.md`;
+- [X] `SPRINT2-5.sql`;
+- [X] `SPRINT3-5.md`;
+- [X] `SPRINT3-5.sql`;
+- [X] `SPRINT4-5.md`;
+- [X] `SPRINT4-5.sql`;
+- [X] `SPRINT5-5.md`;
+- [X] `SPRINT5-5.sql`.
 
 ---
 
@@ -1212,24 +1289,22 @@ Responda brevemente.
 
 ## O que você considera que aprendeu melhor?
 
-> Escreva aqui.
+> Aprendi como ligar as tabelas do jeito certo usando chaves estrangeiras sem deixar dados perdidos, e entendi bem a diferença entre o WHERE (que filtra antes de juntar as contas) e o HAVING (que filtra depois das contas e médias feitas).
 
 ## Qual conteúdo apresentou maior dificuldade?
 
-> Escreva aqui.
+> A ordem de apagar as coisas com o DELETE. Foi difícil lembrar que precisava apagar primeiro o registro na tabela do meio (item_watchlist) antes de conseguir apagar a série na tabela principal, senão o banco travava.
 
 ## Qual erro mais contribuiu para seu aprendizado?
 
-> Escreva aqui.
+> O erro de "chave duplicada" quando tentei rodar o código de novo e a Netflix já existia no banco. Ali aprendi na prática a usar o comando para apagar e recriar o banco do zero (DROP DATABASE IF EXISTS) toda vez que fosse testar o script.
 
 ## Qual parte do banco você considera mais bem implementada?
 
-> Escreva aqui.
-
+> A tabela da lista de séries (item_watchlist). Ela junta o usuário e a série sem precisar de uma coluna extra de ID, não deixa a mesma pessoa colocar a mesma série duas vezes e ainda trava notas fora de 0 a 10.
 ## Se tivesse mais tempo, o que melhoraria?
 
-> Escreva aqui.
-
+> Criaria tabelas para colocar os atores e diretores de cada série, e usaria o comando JOIN para fazer relatórios mais bonitos que mostrassem o nome da série e da plataforma juntos na mesma tela, sem mostrar códigos numéricos.
 ---
 
 # 44. Critério de conclusão da Sprint 5/5
