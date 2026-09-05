@@ -787,7 +787,7 @@ SPRINT3-5.sql
 | PLATAFORMA | 6 |
 | USUARIO | 6 |
 | SERIE | 7 |
-| ITEM_WATCHLIST | 10 |
+| ITEM_WATCHLIST | 11 |
 |  |  |
 
 ---
