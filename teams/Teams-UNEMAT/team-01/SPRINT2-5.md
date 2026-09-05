@@ -59,6 +59,10 @@ A Sprint 2/5 deve ser uma implementação do que foi planejado anteriormente.
 
 Caso seja necessário alterar alguma decisão da Sprint 1/5, isso é permitido, mas a mudança deverá ser registrada neste arquivo.
 
+--text
+Em relação à Sprint 1/5, ajustou-se a tabela associativa item_watchlist para utilizar diretamente uma chave primária composta (id_usuario, id_serie), dispensando o identificador surrogate id_item.
+--
+
 ---
 
 # 2. Passo a passo no MySQL Workbench
@@ -255,8 +259,7 @@ Se `PEDIDO` possui uma FK para `CLIENTE`, então `CLIENTE` deve existir antes de
 2. USUÁRIO
 3. SERIE
 4. ITEM_WATCHLIST (tabela associativa N:N entre usuario e serie)
-5. 
-6. 
+
 
 ---
 
@@ -362,7 +365,7 @@ status VARCHAR(20) NOT NULL DEFAULT 'ATIVO'
 | Tabela | Campo | DEFAULT | Justificativa |
 |---|---|---|---|
 | ITEM_WATCHLIST | status_assistindo | Quero Ver | Caso o usuário salve uma série sem definir o status, o sistema assume que ele pretende assisti-la. |
-|  |  |  |  |
+| SERIE | pais_origem | 'EUA' | Valor padrão adicionado via ALTER TABLE para nacionalidade da produção quando não informada. |
 
 Caso não utilize `DEFAULT`, justifique:
 
