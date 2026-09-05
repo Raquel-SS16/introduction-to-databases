@@ -98,7 +98,7 @@ A descrição deve responder:
 
 **Informações principais:** Dados dos usuários, catálogo de séries, plataformas de streaming onde as séries estão disponíveis e o registro de cada série assistida com nota e status.
 
-**Operações permitidas:** Cadastrar usuários, cadastrar séries e plataformas, adicionar séries à lista pessoal com nota/comentário e consultar séries por nota ou plataforma..
+**Operações permitidas:** Cadastrar usuários, cadastrar séries e plataformas, adicionar séries à lista pessoal com nota/comentário.
 
 ---
 
@@ -229,7 +229,6 @@ Item_watchlist
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-| Id_item | Identificador do item da lista | INT |Sim  |
 | Id_usuário | Usuário dono da lista (FK) |  INT| Sim |
 | Id_serie | Série adicionada (FK) | INT | Sim |
 | Status_assistindo | Status ("Quero Ver", "Assistindo", "Finalizada") | VARCHAR(20) | Sim |
@@ -257,7 +256,7 @@ Cada tabela deverá possuir uma forma de identificar unicamente seus registros.
 | Usuario |  Id_usuario | Código numérico sequencial único gerado via AUTO_INCREMENT. |
 | Plataforma | Id_plataforma |Código numérico sequencial único via AUTO_INCREMENT.  |
 | Serie | Id_serie | Identificador numérico único para evitar duplicidade de títulos. |
-| Item_watchlist |Id_item  | Identificador numérico próprio para cada entrada na lista do usuário. |
+| Item_watchlist |(id_usuario, id_serie) | Chave primária composta pelas duas FKs, identificando unicamente a relação N:N sem necessidade de um ID surrogate. | |
 
 Considere:
 
@@ -305,7 +304,7 @@ N:N  → muitos para muitos
 |---|---|---|
 | Plataforma- serie | 1:N | Uma plataforma pode ter várias series cadastradas. |
 | Usuario - item_watchlist | 1:N | Um usuário pode ter vários registros na lista. |
-| Seri - Item_watchlist | 1:N | Uma serie pode estar na lista de vários usuários. |
+| Serie - Item_watchlist | 1:N | Uma serie pode estar na lista de vários usuários. |
 |  |  |  |
 
 ---
@@ -317,7 +316,6 @@ N:N  → muitos para muitos
 | SERIE | Id_plataforma | Plataforma (id_plataforma) |
 | ITEM_WATCHLIST | Id_usuario | Usuario (Id_usuário) |
 | ITEM_WATCHLIST | Id_serie | Serie (Id_serie) |
-|  |  |  |
 
 > As `FOREIGN KEY` serão implementadas posteriormente. Nesta Sprint, apenas planeje os relacionamentos.
 
@@ -338,12 +336,11 @@ AUTO_INCREMENT
 
 | Tabela | Atributo | Restrição prevista | Motivo |
 |---|---|---|---|
-| USUARIO |E-mail  | UNIQUE, NOT NULL | Impede que existam dois usuários com o mesmo e-mail. |
-| PLATAFORMA | Nome_plataforma | UNIQUE, NOT NULL | Evita duplicidade de cadastro da mesma plataforma de streaming. |
-|ITEM_WATCHLIST  | (Id_usuario, Id_serie) | UNIQUE | Garante que o mesmo usuário não cadastre a mesma série mais de uma vez em sua lista. |
-| ITEM_WATCHLIST  | Status_assistindo | DEFAULT 'Quero Ver' | Caso o usuário não especifique, a série entra automaticamente como "Quero Ver". |
-| TODAS | Id_* | PRIMARY KEY, AUTO_INCREMENT | Garante a unicidade e o preenchimento automático das chaves primárias. |
-
+| USUARIO | email | UNIQUE, NOT NULL | Impede que existam dois usuários com o mesmo e-mail. |
+| PLATAFORMA | nome_plataforma | UNIQUE, NOT NULL | Evita duplicidade de cadastro da mesma plataforma de streaming. |
+| ITEM_WATCHLIST | (id_usuario, id_serie) | PRIMARY KEY | Identifica a linha de forma única e impede que o mesmo usuário repita a mesma série na lista. |
+| ITEM_WATCHLIST | status_assistindo | DEFAULT 'Quero Ver' | Caso o usuário não especifique, a série entra automaticamente como "Quero Ver". |
+| USUARIO, PLATAFORMA, SERIE | id_* | PRIMARY KEY, AUTO_INCREMENT | Garante a identificação única e o preenchimento automático das chaves primárias das entidades base. |
 ---
 
 # 13. Regras de negócio
@@ -411,9 +408,8 @@ USUARIO
 └── data_cadastro
 
 ITEM_WATCHLIST
-├── id_item (PK)
-├── id_usuario (FK)
-├── id_serie (FK)
+├── id_usuario (PK, FK)
+├── id_serie (PK, FK)
 ├── status_assistindo
 ├── nota
 └── comentario
@@ -621,5 +617,3 @@ DEFAULT
 ```
 
 > **Não implemente a Sprint 2/5 neste arquivo.**
-
-
