@@ -1,22 +1,20 @@
 -- ============================================================
 -- IDENTIFICAÇÃO
 -- ============================================================
-
--- Aluno: RAQUEL SILVA DOS SANTOS
--- Banco: series_watchlist_db
-
+-- 
+-- Aluna      : Raquel Silva dos Santos
+-- Banco      : series_watchlist_db
 
 -- ============================================================
 -- SELECIONAR O BANCO
 -- ============================================================
-
 USE series_watchlist_db;
 
-
 -- ============================================================
--- INSERTS — TABELA 1: PLATAFORMA (Independente)
+-- INSERTS — TABELAS INDEPENDENTES
 -- ============================================================
 
+-- Tabela 1: PLATAFORMA (sem dependências)
 INSERT INTO plataforma (nome_plataforma)
 VALUES 
     ('Netflix'),
@@ -26,11 +24,7 @@ VALUES
     ('Apple TV+'),
     ('Paramount+');
 
-
--- ============================================================
--- INSERTS — TABELA 2: USUARIO (Independente)
--- ============================================================
-
+-- Tabela 2: USUARIO (sem dependências)
 INSERT INTO usuario (nome, email, data_cadastro)
 VALUES 
     ('Lucas Silveira', 'lucas.silveira@email.com', '2024-01-15'),
@@ -40,11 +34,11 @@ VALUES
     ('Rafael Souza', 'rafael.souza@email.com', '2024-03-12'),
     ('Fernanda Costa', 'fernanda.costa@email.com', '2024-03-20');
 
-
 -- ============================================================
--- INSERTS — TABELA 3: SERIE (Depende de PLATAFORMA)
+-- INSERTS — TABELAS DEPENDENTES
 -- ============================================================
 
+-- Tabela 3: SERIE (depende de PLATAFORMA)
 INSERT INTO serie (titulo, genero, ano_lancamento, id_plataforma, pais_origem)
 VALUES 
     ('Stranger Things', 'Ficção Científica', 2016, 1, 'EUA'),
@@ -56,73 +50,67 @@ VALUES
     ('Succession', 'Drama', 2018, 2, 'EUA'),
     ('Serie Cancelada Teste', 'Comédia', 2020, 6, 'EUA');
 
-
 -- ============================================================
--- INSERTS — TABELA 4: ITEM_WATCHLIST (Depende de USUARIO e SERIE)
+-- INSERTS — TABELA ASSOCIATIVA (N:N)
 -- ============================================================
 
-INSERT INTO item_watchlist (id_usuario, id_serie, status_assistindo)
+-- Tabela 4: ITEM_WATCHLIST (depende de USUARIO e SERIE)
+INSERT INTO item_watchlist (id_usuario, id_serie, status_assistindo, nota, comentario)
 VALUES 
-    (1, 1, 'Concluído'),
-    (1, 2, 'Assistindo'),
-    (1, 5, 'Quero Ver'),
-    (2, 2, 'Concluído'),
-    (2, 6, 'Concluído'),
-    (3, 3, 'Assistindo'),
-    (3, 4, 'Quero Ver'),
-    (4, 1, 'Assistindo'),
-    (4, 7, 'Concluído'),
-    (5, 5, 'Quero Ver'),
-    (6, 8, 'Quero Ver');
-
+    (1, 1, 'Concluído', 9.5, 'Excelente primeira e quarta temporadas.'),
+    (1, 2, 'Assistindo', 9.0, 'Adaptação muito fiel ao jogo.'),
+    (1, 5, 'Quero Ver', NULL, NULL),
+    (2, 2, 'Concluído', 10.0, 'Uma obra-prima dramática.'),
+    (2, 6, 'Concluído', 9.8, 'Roteiro complexo e trilha fantástica.'),
+    (3, 3, 'Assistindo', 8.5, 'Sátira ácida muito boa.'),
+    (3, 4, 'Quero Ver', NULL, NULL),
+    (4, 1, 'Assistindo', 8.0, 'Ritmo bom.'),
+    (4, 7, 'Concluído', 9.7, 'Atuações impecáveis.'),
+    (5, 5, 'Quero Ver', NULL, NULL),
+    (6, 8, 'Quero Ver', NULL, 'Adicionada para teste de remoção.');
 
 -- ============================================================
--- VERIFICAÇÕES
+-- VERIFICAÇÕES INTERMEDIÁRIAS
 -- ============================================================
-
 SELECT * FROM plataforma;
 SELECT * FROM usuario;
 SELECT * FROM serie;
 SELECT * FROM item_watchlist;
 
-
 -- ============================================================
--- UPDATES
+-- OPERAÇÕES DE UPDATE (Mínimo de 3)
 -- ============================================================
 
--- 1. Atualiza status de uma série na watchlist de um usuário específico
+-- UPDATE 1: Atualização de status na watchlist de um usuário
 UPDATE item_watchlist
 SET status_assistindo = 'Concluído'
 WHERE id_usuario = 1 AND id_serie = 2;
 
--- 2. Atualiza o e-mail de um usuário
+-- UPDATE 2: Atualização de e-mail de um usuário
 UPDATE usuario
 SET email = 'carlos.eduardo.dev@email.com'
 WHERE id_usuario = 3;
 
--- 3. Atualiza o gênero de catálogo de uma série
+-- UPDATE 3: Ajuste de gênero em uma série
 UPDATE serie
 SET genero = 'Drama / Ficção Científica'
 WHERE id_serie = 2;
 
-
 -- ============================================================
--- DELETES
+-- OPERAÇÕES DE DELETE (Mínimo de 2)
 -- ============================================================
 
--- 1. Remove primeiro a dependência na tabela associativa filha
+-- DELETE 1: Remover o registro filho na tabela associativa
 DELETE FROM item_watchlist
 WHERE id_usuario = 6 AND id_serie = 8;
 
--- 2. Remove o registro pai na tabela serie (agora sem violar Foreign Key)
+-- DELETE 2: Remover o registro pai na tabela serie (agora sem impedimento de FK)
 DELETE FROM serie
 WHERE id_serie = 8;
-
 
 -- ============================================================
 -- VERIFICAÇÃO FINAL
 -- ============================================================
-
 SELECT * FROM plataforma;
 SELECT * FROM usuario;
 SELECT * FROM serie;
