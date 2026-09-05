@@ -812,26 +812,26 @@ Não exclua arquivos anteriores.
 
 # 23. Checklist da Sprint 4/5
 
-- [ ] utilizei o banco das Sprints anteriores;
-- [ ] confirmei que existem dados suficientes;
-- [ ] utilizei `SELECT`;
-- [ ] selecionei colunas específicas;
-- [ ] utilizei `WHERE`;
-- [ ] utilizei mais de uma condição;
-- [ ] utilizei `ORDER BY`;
-- [ ] utilizei `COUNT`;
-- [ ] utilizei `SUM`, quando aplicável;
-- [ ] utilizei `AVG`, quando aplicável;
-- [ ] utilizei `MIN` ou `MAX`;
-- [ ] utilizei `GROUP BY`;
-- [ ] utilizei `HAVING`;
-- [ ] utilizei aliases com `AS`;
-- [ ] utilizei expressão SQL quando aplicável;
-- [ ] minhas consultas respondem perguntas reais;
-- [ ] testei as consultas no MySQL Workbench;
-- [ ] salvei o código em `SPRINT4-5.sql`;
-- [ ] preenchi completamente o `SPRINT4-5.md`;
-- [ ] revisei os arquivos antes do commit.
+- [x] utilizei o banco das Sprints anteriores;
+- [x] confirmei que existem dados suficientes;
+- [x] utilizei `SELECT`;
+- [x] selecionei colunas específicas;
+- [x] utilizei `WHERE`;
+- [x] utilizei mais de uma condição;
+- [x] utilizei `ORDER BY`;
+- [x] utilizei `COUNT`;
+- [x] utilizei `SUM`, quando aplicável;
+- [x] utilizei `AVG`, quando aplicável;
+- [x] utilizei `MIN` ou `MAX`;
+- [x] utilizei `GROUP BY`;
+- [x] utilizei `HAVING`;
+- [x] utilizei aliases com `AS`;
+- [x] utilizei expressão SQL quando aplicável;
+- [x] minhas consultas respondem perguntas reais;
+- [x] testei as consultas no MySQL Workbench;
+- [x] salvei o código em `SPRINT4-5.sql`;
+- [x] preenchi completamente o `SPRINT4-5.md`;
+- [x] revisei os arquivos antes do commit.
 
 ---
 
