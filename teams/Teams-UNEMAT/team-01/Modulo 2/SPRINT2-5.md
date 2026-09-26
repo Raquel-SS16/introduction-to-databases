@@ -36,11 +36,12 @@ O aluno deverá continuar utilizando o mesmo banco do `Module-1`.
 
 **Nome completo:**
 
-> Escreva aqui.
+> Raquel Silva dos Santos
 
 **Banco utilizado:**
 
 ```text
+series_watchlist_db
 
 ```
 
@@ -72,11 +73,11 @@ Neste exemplo:
 
 Defina pelo menos cinco perguntas do seu domínio que possam ser resolvidas com subconsultas.
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. Quais séries obtiveram nota média superior à média geral de todas as avaliações registadas na base de dados?
+2. Quais utilizadores têm pelo menos uma série adicionada à sua watchlist?
+3. Quais plataformas de streaming cadastradas não possuem qualquer série vinculada no catálogo?
+4. Quais são as séries mais antigas do catálogo (lançadas no menor ano registado)?
+5. Para cada utilizador, quais são as séries cuja nota atribuída foi estritamente superior à sua própria média pessoal de avaliações?
 
 ---
 
@@ -86,19 +87,31 @@ Crie uma consulta utilizando uma comparação com resultado agregado.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais são as séries cuja avaliação individual na watchlist foi superior à média aritmética de todas as notas registadas na plataforma?
+
+SQL
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    id_serie, 
+    id_usuario, 
+    nota, 
+    comentario
+FROM item_watchlist
+WHERE nota > (
+    SELECT AVG(nota)
+    FROM item_watchlist
+    WHERE nota IS NOT NULL
+);
 ```
 
 **Explique primeiro a consulta interna:**
 
-> Escreva aqui.
+> A subconsulta (SELECT AVG(nota) FROM item_watchlist WHERE nota IS NOT NULL) é executada e calcula a média geral de todas as notas válidas do sistema, retornando um único valor escalar (por exemplo, 9.21).
 
 **Depois explique a consulta externa:**
 
-> Escreva aqui.
+> A consulta externa examina linha a linha da tabela item_watchlist e seleciona apenas os registos cujo valor na coluna nota é estritamente maior do que o valor escalar retornado pela consulta interna.
 
 ---
 
@@ -119,15 +132,23 @@ WHERE id_cliente IN (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais utilizadores possuem pelo menos uma série registada na sua lista de acompanhamento (item_watchlist)?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    id_usuario, 
+    nome, 
+    email
+FROM usuario
+WHERE id_usuario IN (
+    SELECT DISTINCT id_usuario
+    FROM item_watchlist
+);
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> A subconsulta gera uma lista vertical com todos os identificadores de utilizadores (id_usuario) presentes na tabela associativa item_watchlist. O operador IN compara o identificador da tabela usuario com esse conjunto, trazendo apenas os utilizadores ativos que já adicionaram itens.
 
 ---
 
@@ -135,15 +156,25 @@ WHERE id_cliente IN (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais plataformas de streaming registadas no sistema não possuem nenhuma série associada no catálogo?
+
+SQL
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    id_plataforma, 
+    nome_plataforma
+FROM plataforma
+WHERE id_plataforma NOT IN (
+    SELECT DISTINCT id_plataforma
+    FROM serie
+    WHERE id_plataforma IS NOT NULL
+);
 ```
 
 **Que registros você está procurando?**
 
-> Escreva aqui.
+> Estamos à procura das plataformas que estão ociosas no catálogo (como a Paramount+, cujo ID não se encontra na tabela serie). O filtro explícito WHERE id_plataforma IS NOT NULL na subconsulta é uma boa prática para evitar que valores nulos invalidem a lógica booleana do NOT IN.
 
 ---
 
@@ -155,10 +186,19 @@ WHERE id_cliente IN (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais utilizadores atribuíram nota máxima (10.0) a pelo menos uma série?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.id_usuario, 
+    u.nome
+FROM usuario AS u
+WHERE EXISTS (
+    SELECT 1
+    FROM item_watchlist AS w
+    WHERE w.id_usuario = u.id_usuario
+      AND w.nota = 10.0
+);
 ```
 
 ---
