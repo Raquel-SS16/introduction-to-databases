@@ -207,15 +207,24 @@ WHERE EXISTS (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais utilizadores cadastrados no sistema ainda não têm nenhuma série adicionada à sua watchlist?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.id_usuario, 
+    u.nome, 
+    u.email
+FROM usuario AS u
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM item_watchlist AS w
+    WHERE w.id_usuario = u.id_usuario
+);
 ```
 
 **Explique a diferença em relação a `EXISTS`:**
 
-> Escreva aqui.
+> Enquanto o EXISTS retorna verdadeiro quando a subconsulta encontra ao menos uma linha correspondente, o NOT EXISTS inverte essa lógica: ele apenas seleciona o utilizador se a subconsulta retornar um conjunto vazio, identificando utilizadores inativos (como a utilizadora Fernanda Costa).
 
 ---
 
@@ -223,15 +232,24 @@ WHERE EXISTS (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais são as séries mais antigas cadastradas no catálogo (que possuem o menor ano de lançamento)?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    id_serie, 
+    titulo, 
+    genero, 
+    ano_lancamento
+FROM serie
+WHERE ano_lancamento = (
+    SELECT MIN(ano_lancamento)
+    FROM serie
+);
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> A subconsulta calcula o menor ano presente no catálogo (MIN(ano_lancamento) = 2016). Em seguida, a consulta principal busca todas as séries cujo ano_lancamento seja igual a esse valor mínimo (neste caso, Stranger Things), evitando fixar o ano de forma manual no código.
 
 ---
 
@@ -243,15 +261,25 @@ Uma subconsulta correlacionada depende de valores da consulta externa.
 
 **Pergunta:**
 
-> Escreva aqui.
-
+> Quais séries em watchlist receberam nota individual superior à média de notas calculada especificamente para essa mesma série?
 ```sql
--- Cole aqui.
+-- SELECT 
+    w1.id_usuario, 
+    w1.id_serie, 
+    w1.nota, 
+    w1.comentario
+FROM item_watchlist AS w1
+WHERE w1.nota > (
+    SELECT AVG(w2.nota)
+    FROM item_watchlist AS w2
+    WHERE w2.id_serie = w1.id_serie
+      AND w2.nota IS NOT NULL
+);
 ```
 
 **Qual coluna da consulta externa é utilizada pela subconsulta?**
 
-> Escreva aqui.
+> A coluna w1.id_serie. Para cada linha avaliada na consulta externa, a subconsulta interna recalcula dinamicamente a média aritmética restrita àquela série (w2.id_serie = w1.id_serie), comparando a avaliação do utilizador com a média da própria obra.
 
 ---
 
@@ -266,45 +294,73 @@ b) SUBQUERY
 
 ## Pergunta 1
 
-> Escreva aqui.
+> Quais plataformas possuem séries cadastradas no catálogo?
 
 ### JOIN
 
 ```sql
--- Cole aqui.
+-- SELECT DISTINCT 
+    p.id_plataforma, 
+    p.nome_plataforma
+FROM plataforma AS p
+INNER JOIN serie AS s
+    ON p.id_plataforma = s.id_plataforma;
 ```
 
 ### SUBQUERY
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    p.id_plataforma, 
+    p.nome_plataforma
+FROM plataforma AS p
+WHERE p.id_plataforma IN (
+    SELECT s.id_plataforma
+    FROM serie AS s
+);
 ```
 
 ### Qual abordagem ficou mais compreensível?
 
-> Escreva aqui e justifique.
+> A abordagem com SUBQUERY (IN) ficou mais declarativa e compreensível, pois expressa diretamente a intenção da pergunta ("traga as plataformas cujo ID esteja no conjunto de plataformas com séries"), além de dispensar o uso de DISTINCT, necessário na solução com INNER JOIN para eliminar duplicados causados pela relação 1:N.
 
 ---
 
 ## Pergunta 2
 
-> Escreva aqui.
+> Quais utilizadores nunca adicionaram nenhuma série à watchlist?
 
 ### JOIN
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.id_usuario, 
+    u.nome, 
+    u.email
+FROM usuario AS u
+LEFT JOIN item_watchlist AS w
+    ON u.id_usuario = w.id_usuario
+WHERE w.id_usuario IS NULL;
 ```
 
 ### SUBQUERY
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.id_usuario, 
+    u.nome, 
+    u.email
+FROM usuario AS u
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM item_watchlist AS w
+    WHERE w.id_usuario = u.id_usuario
+);
 ```
 
 ### Comparação
 
-> Escreva aqui.
+> A técnica de LEFT JOIN ... WHERE chave IS NULL é tradicional em modelagem relacional, mas exige raciocinar sobre junções externas e valores nulos gerados. A abordagem com NOT EXISTS possui leitura semântica mais direta ("selecione o utilizador onde não exista registo na watchlist") e costuma ter desempenho superior no motor do MySQL, pois encerra a pesquisa no primeiro registo encontrado.
 
 ---
 
@@ -330,7 +386,15 @@ O `SPRINT2-5.sql` deverá conter no mínimo:
 Escolha uma subconsulta.
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    id_serie, 
+    titulo, 
+    ano_lancamento
+FROM serie
+WHERE ano_lancamento = (
+    SELECT MIN(ano_lancamento)
+    FROM serie
+);
 ```
 
 Responda:
@@ -339,8 +403,7 @@ Responda:
 2. Qual valor ou conjunto de valores ela retorna?
 3. Como esse resultado é utilizado pela consulta externa?
 
-> Escreva aqui.
-
+> A consulta executada primeiro é a interna (SELECT MIN(ano_lancamento) FROM serie;), que calcula e retorna um único valor numérico escalar igual a 2016; em seguida, a consulta externa consome esse resultado direto no filtro relacional (WHERE ano_lancamento = 2016), selecionando todas as linhas da tabela serie cuja coluna ano_lancamento coincide com o valor mínimo obtido.
 ---
 
 # 14. Teste operacional no Workbench
@@ -350,26 +413,34 @@ Execute uma consulta e altere temporariamente um valor de filtro.
 **Consulta original:**
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    id_serie, 
+    id_usuario, 
+    nota
+FROM item_watchlist
+WHERE nota > (
+    SELECT AVG(nota)
+    FROM item_watchlist
+    WHERE nota IS NOT NULL
+);
 ```
 
 **Alteração realizada:**
 
-> Escreva aqui.
+> Modificou-se o operador relacional de maior (>) para menor ou igual (<=):
 
 **Mudança observada:**
 
-> Escreva aqui.
-
+> A consulta original retornava apenas as notas de topo (acima de ~9.21, como as avaliações 9.5, 9.7, 9.8 e 10.0). Após a inversão para <=, o conjunto de resultados passou a exibir as notas inferiores ou medianas (como 8.0, 8.5 e 9.0), confirmando a partição exata do domínio pelo valor da média.
 ---
 
 # 15. Problemas encontrados
 
 | Problema | Causa | Solução |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Linhas duplicadas na consulta de teste com INNER JOIN | A cardinalidade 1:N entre tabelas faz com que a tabela pai repita para cada filho encontrado | Uso da cláusula DISTINCT ou refatoração para subconsulta com IN |
+| Risco de resultado vazio com NOT IN | Se a subconsulta retornar qualquer valor NULL, o operador NOT IN retorna UNKNOWN/falso para todas as linhas | Adição da cláusula WHERE coluna IS NOT NULL na subconsulta interna |
+| Ambiguidade de tabelas em subconsultas correlacionadas | A tabela externa e interna pertenciam à mesma entidade (item_watchlist) | Definição clara de aliases distintos (w1 para externa e w2 para interna) |
 
 ---
 
