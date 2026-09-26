@@ -59,7 +59,7 @@ Não altere nem apague os arquivos do `Module-1`.
 
 **Nome completo:**
 
-> 
+> Raquel Silva dos Santos
 
 **Branch:**
 
@@ -71,13 +71,13 @@ Não altere nem apague os arquivos do `Module-1`.
 
 ```text
 
-
+series_watchlist_db
 
 ```
 
 **Tema do projeto:**
 
-> 
+> Sistema de Catálogo de Séries e Gerenciamento de Watchlist com Avaliações de Usuários por Plataforma de Streaming.
 
 ---
 
@@ -87,10 +87,10 @@ Liste as principais tabelas que serão utilizadas.
 
 | Nº | Tabela | PK | Principais FKs |
 |---:|---|---|---|
-| 1 | |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  | |
+| 1 | plataforma | id_plataforma | Nenhuma |
+| 2 | usuario | id_usuario | Nenhuma |
+| 3 | serie | id_serie | id_plataforma (referencia plataforma.id_plataforma) |
+| 4 | item_watchlist | (id_usuario, id_serie) | id_usuario (referencia usuario.id_usuario), id_serie (referencia serie.id_serie) |
 | 5 |  |  |  |
 
 ---
@@ -99,10 +99,10 @@ Liste as principais tabelas que serão utilizadas.
 
 | Tabela A | Cardinalidade | Tabela B | FK utilizada |
 |---|---|---|---|
-|  | |  |  |
-|  |  |  |  |
-|  |  |  | |
-|  |  |  | |
+| plataforma | 1:N | serie | serie.id_plataforma |
+| usuario | 1:N | item_watchlist | item_watchlist.id_usuario |
+| serie | 1:N | item_watchlist | item_watchlist.id_serie |
+| usuario | N:N | serie | Implementada por meio da associativa item_watchlist |
 
 ---
 
@@ -125,11 +125,12 @@ INNER JOIN tabela_b AS b
 
 **Pergunta em linguagem natural:**
 
-> Escreva aqui.
+> Quais séries estão cadastradas e qual é o nome da plataforma de streaming onde cada uma é exibida?
 
 **Tabelas utilizadas:**
 
 ```text
+serie, plataforma
 
 ```
 
@@ -137,31 +138,50 @@ INNER JOIN tabela_b AS b
 
 ```text
 
+PK: plataforma.id_plataforma
+FK: serie.id_plataforma
+
 ```
 
 **SQL:**
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    s.titulo AS nome_serie,
+    s.genero,
+    s.ano_lancamento,
+    p.nome_plataforma AS servico_streaming
+FROM serie AS s
+INNER JOIN plataforma AS p
+    ON s.id_plataforma = p.id_plataforma;
 ```
 
 **Explique o resultado:**
 
-> Escreva aqui.
+> Retorna apenas os registros de séries que possuem correspondência direta com uma plataforma cadastrada. Traz o título, o gênero e o ano da série acompanhados do nome legível da plataforma de streaming (como Netflix, HBO Max), substituindo a chave numérica estrangeira.
 
 ## Consulta INNER JOIN 2
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais usuários já adicionaram séries em sua lista e qual é o título e status de cada item?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.nome AS usuario,
+    s.titulo AS serie,
+    w.status_assistindo,
+    w.nota
+FROM usuario AS u
+INNER JOIN item_watchlist AS w
+    ON u.id_usuario = w.id_usuario
+INNER JOIN serie AS s
+    ON w.id_serie = s.id_serie;
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> Realiza a junção entre o usuário, o registro de watchlist e a série correspondente. Apenas os usuários que possuem ao menos uma série em sua lista e cujas séries existem no catálogo são exibidos, correlacionando o nome da pessoa ao título assistido e à nota dada.
 
 ---
 
@@ -173,15 +193,22 @@ O `LEFT JOIN` mantém todos os registros da tabela à esquerda, mesmo quando nã
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais são todos os usuários cadastrados no banco e quais séries eles têm na watchlist (incluindo aqueles que não adicionaram nenhuma série)?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.nome AS usuario,
+    u.email,
+    w.status_assistindo,
+    w.nota
+FROM usuario AS u
+LEFT JOIN item_watchlist AS w
+    ON u.id_usuario = w.id_usuario;
 ```
 
 **O que o LEFT JOIN permite visualizar neste caso?**
 
-> Escreva aqui.
+> Mantém todos os registros da tabela da esquerda (usuario). Usuários que não cadastraram itens na watchlist (como a usuária Fernanda Costa, após a remoção do item de teste) continuam sendo listados, trazendo os campos status_assistindo e nota preenchidos com NULL, permitindo identificar usuários inativos.
 
 ---
 
@@ -193,15 +220,20 @@ O `RIGHT JOIN` mantém todos os registros da tabela da direita, mesmo quando nã
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais são todas as plataformas cadastradas e quais séries pertencem a cada uma, incluindo plataformas que não têm nenhuma série associada?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    s.titulo AS serie,
+    p.nome_plataforma
+FROM serie AS s
+RIGHT JOIN plataforma AS p
+    ON s.id_plataforma = p.id_plataforma;
 ```
 
 **Explique o resultado:**
 
-> Escreva aqui.
+> O RIGHT JOIN garante que todas as plataformas (tabela à direita) apareçam no resultado final. Plataformas que não possuem séries associadas no momento (como a Paramount+, cuja única série de teste foi removida no Módulo 1) continuam sendo listadas com o campo serie como NULL.
 
 ---
 
@@ -213,20 +245,47 @@ Crie duas consultas envolvendo pelo menos três tabelas.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual é a listagem completa dos comentários e notas dos usuários, exibindo o nome do usuário, o título da série e a plataforma onde ela está disponível?
+
+SQL:
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.nome AS usuario,
+    s.titulo AS serie,
+    p.nome_plataforma,
+    w.nota,
+    w.comentario
+FROM usuario AS u
+INNER JOIN item_watchlist AS w
+    ON u.id_usuario = w.id_usuario
+INNER JOIN serie AS s
+    ON w.id_serie = s.id_serie
+INNER JOIN plataforma AS p
+    ON s.id_plataforma = p.id_plataforma;
 ```
 
 ## Consulta 2
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais séries em andamento ou concluídas cada usuário assiste, trazendo detalhes de país de origem da produção e nome do serviço de streaming?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.nome AS usuario,
+    s.titulo AS serie,
+    s.pais_origem,
+    p.nome_plataforma,
+    w.status_assistindo
+FROM usuario AS u
+INNER JOIN item_watchlist AS w
+    ON u.id_usuario = w.id_usuario
+INNER JOIN serie AS s
+    ON w.id_serie = s.id_serie
+INNER JOIN plataforma AS p
+    ON s.id_plataforma = p.id_plataforma
+WHERE w.status_assistindo IN ('Assistindo', 'Concluído');
 ```
 
 ---
@@ -235,15 +294,29 @@ Crie duas consultas envolvendo pelo menos três tabelas.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais séries da plataforma "HBO Max" foram adicionadas às listas dos usuários com o status "Concluído"?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.nome AS usuario,
+    s.titulo AS serie,
+    p.nome_plataforma,
+    w.status_assistindo,
+    w.nota
+FROM usuario AS u
+INNER JOIN item_watchlist AS w
+    ON u.id_usuario = w.id_usuario
+INNER JOIN serie AS s
+    ON w.id_serie = s.id_serie
+INNER JOIN plataforma AS p
+    ON s.id_plataforma = p.id_plataforma
+WHERE p.nome_plataforma = 'HBO Max' 
+  AND w.status_assistindo = 'Concluído';
 ```
 
 **Explique o filtro:**
 
-> Escreva aqui.
+> O WHERE filtra os dados após a junção das quatro tabelas, restringindo o resultado a registros onde o nome da plataforma é exatamente 'HBO Max' e o usuário já finalizou a exibição (status_assistindo = 'Concluído').
 
 ---
 
@@ -251,10 +324,21 @@ Crie duas consultas envolvendo pelo menos três tabelas.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Como listar todas as avaliações com nota atribuída, ordenadas da maior nota para a menor e, em caso de empate, pelo nome do usuário?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.nome AS usuario,
+    s.titulo AS serie,
+    w.nota,
+    w.status_assistindo
+FROM item_watchlist AS w
+INNER JOIN usuario AS u
+    ON w.id_usuario = u.id_usuario
+INNER JOIN serie AS s
+    ON w.id_serie = s.id_serie
+WHERE w.nota IS NOT NULL
+ORDER BY w.nota DESC, u.nome ASC;
 ```
 
 ---
@@ -265,15 +349,22 @@ Crie uma consulta que combine tabelas e utilize ao menos uma função de agrega�
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual é a quantidade de séries cadastradas em cada plataforma de streaming?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    p.nome_plataforma,
+    COUNT(s.id_serie) AS total_series_disponiveis
+FROM plataforma AS p
+LEFT JOIN serie AS s
+    ON p.id_plataforma = s.id_plataforma
+GROUP BY p.id_plataforma, p.nome_plataforma
+ORDER BY total_series_disponiveis DESC;
 ```
 
 **Explique o agrupamento:**
 
-> Escreva aqui.
+> A cláusula GROUP BY p.id_plataforma, p.nome_plataforma agrupa os registros por cada serviço de streaming. O uso da função de agregação COUNT(s.id_serie) combinada ao LEFT JOIN permite contar quantas séries cada plataforma possui no catálogo, exibindo 0 caso não haja títulos associados.
 
 ---
 
@@ -299,15 +390,26 @@ As consultas devem responder perguntas reais sobre o banco.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual é o relatório consolidado de desempenho de cada série, contendo o título, plataforma de exibição, quantidade de usuários que a adicionaram e a nota média recebida?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    s.titulo AS serie,
+    p.nome_plataforma AS plataforma,
+    COUNT(w.id_usuario) AS total_interessados,
+    ROUND(AVG(w.nota), 2) AS media_avaliacao
+FROM serie AS s
+INNER JOIN plataforma AS p
+    ON s.id_plataforma = p.id_plataforma
+LEFT JOIN item_watchlist AS w
+    ON s.id_serie = w.id_serie
+GROUP BY s.id_serie, s.titulo, p.nome_plataforma
+ORDER BY media_avaliacao DESC;
 ```
 
 **Por que ela é útil?**
 
-> Escreva aqui.
+>Essa consulta é um painel gerencial da aplicação. Ela une o catálogo de produções com os serviços de streaming e calcula indicadores cruciais (engajamento de audiência e aprovação dos usuários), auxiliando na tomada de decisões sobre curadoria e recomendações de conteúdo.
 
 ---
 
@@ -316,7 +418,14 @@ As consultas devem responder perguntas reais sobre o banco.
 Escolha uma consulta produzida nesta Sprint.
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    s.titulo AS nome_serie,
+    s.genero,
+    s.ano_lancamento,
+    p.nome_plataforma AS servico_streaming
+FROM serie AS s
+INNER JOIN plataforma AS p
+    ON s.id_plataforma = p.id_plataforma;
 ```
 
 Explique:
@@ -336,16 +445,35 @@ Explique:
 **Consulta executada:**
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.nome AS usuario,
+    s.titulo AS serie,
+    w.status_assistindo,
+    w.nota
+FROM usuario AS u
+INNER JOIN item_watchlist AS w
+    ON u.id_usuario = w.id_usuario
+INNER JOIN serie AS s
+    ON w.id_serie = s.id_serie;
 ```
 
 **Resultado esperado:**
 
-> Escreva aqui.
+> Relação das entradas ativas na watchlist, vinculando o nome do usuário com o título da série correspondente, seu status de visualização e nota.
 
 **Resultado obtido:**
 
-> Escreva aqui.
+> 9 linhas retornadas com sucesso, listando:
+
+Lucas Silveira (Stranger Things, The Last of Us, Severance)
+
+Beatriz Lima (The Last of Us, Dark)
+
+Carlos Eduardo (The Boys, The Mandalorian)
+
+Mariana Santos (Stranger Things, Succession)
+
+Rafael Souza (Severance)
 
 ---
 
