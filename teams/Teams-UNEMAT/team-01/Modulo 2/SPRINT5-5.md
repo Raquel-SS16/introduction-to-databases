@@ -38,12 +38,12 @@ ROLLBACK
 
 **Nome completo:**
 
-> Escreva aqui.
+> Raquel Silva dos Santos
 
 **Banco utilizado:**
 
 ```text
-
+series_watchlist_db
 ```
 
 ---
@@ -52,11 +52,11 @@ ROLLBACK
 
 | Sprint | Conteúdo | Concluído? |
 |---|---|---|
-| 1/5 | JOINs |  |
-| 2/5 | Subconsultas |  |
-| 3/5 | Views |  |
-| 4/5 | Procedures e Functions |  |
-| 5/5 | Triggers e Transações |  |
+| 1/5 | JOINs | Sim |
+| 2/5 | Subconsultas | Sim |
+| 3/5 | Views | Sim |
+| 4/5 | Procedures e Functions | Sim |
+| 5/5 | Triggers e Transações | Sim |
 
 ---
 
@@ -77,20 +77,20 @@ registrar data de modificação
 
 **Regra escolhida:**
 
-> Escreva aqui.
+> Consistência e integridade de domínio: quando um item for inserido ou atualizado na watchlist com o status 'Quero Ver', a sua nota deve ser compulsoriamente forçada para NULL, impedindo a avaliação prévia de uma produção ainda não assistida.
 
 **Evento:**
 
-- [ ] BEFORE INSERT
+- [x] BEFORE INSERT
 - [ ] AFTER INSERT
-- [ ] BEFORE UPDATE
+- [x] BEFORE UPDATE
 - [ ] AFTER UPDATE
 - [ ] Outro
 
 **Tabela envolvida:**
 
 ```text
-
+item_watchlist
 ```
 
 ---
@@ -115,12 +115,48 @@ DELIMITER ;
 **SQL do seu Trigger:**
 
 ```sql
--- Cole aqui.
+-- DELIMITER //
+
+CREATE TRIGGER trg_validar_status_nota_bi
+BEFORE INSERT ON item_watchlist
+FOR EACH ROW
+BEGIN
+    IF NEW.status_assistindo = 'Quero Ver' THEN
+        SET NEW.nota = NULL;
+    END IF;
+END //
+
+CREATE TRIGGER trg_validar_status_nota_bu
+BEFORE UPDATE ON item_watchlist
+FOR EACH ROW
+BEGIN
+    IF NEW.status_assistindo = 'Quero Ver' THEN
+        SET NEW.nota = NULL;
+    END IF;
+END //
+
+DELIMITER ;
 ```
 
 **Explique linha por linha:**
 
-> Escreva aqui.
+> DELIMITER //: altera o delimitador padrão para compilar instruções SQL compostas.
+
+CREATE TRIGGER trg_validar_status_nota_bi: define o gatilho nomeado para o evento de inserção.
+
+BEFORE INSERT ON item_watchlist: determina que o gatilho será disparado antes da persistência física na tabela item_watchlist.
+
+FOR EACH ROW: indica que a verificação é realizada linha a linha (nível de tupla).
+
+BEGIN ... END: bloco delimitador do corpo procedural do gatilho.
+
+IF NEW.status_assistindo = 'Quero Ver' THEN: verifica se o novo registro a ser gravado possui o status 'Quero Ver'.
+
+SET NEW.nota = NULL;: intercepta a coluna e anula o valor de nota em memória antes da escrita em disco.
+
+A mesma lógica é aplicada no BEFORE UPDATE para interceptar alterações via comando UPDATE.
+
+DELIMITER ;: restaura o delimitador padrão do MySQL.
 
 ---
 
@@ -129,24 +165,27 @@ DELIMITER ;
 **Estado antes do teste:**
 
 ```sql
--- SELECT utilizado.
+-- SELECT * FROM item_watchlist WHERE id_usuario = 5 AND id_serie = 5;
 ```
 
 **Operação executada:**
 
 ```sql
--- INSERT ou UPDATE utilizado.
+-- -- Tentativa de atualizar com status 'Quero Ver' atribuindo nota indevida 10.0
+UPDATE item_watchlist
+SET status_assistindo = 'Quero Ver', nota = 10.0
+WHERE id_usuario = 5 AND id_serie = 5;
 ```
 
 **Estado depois do teste:**
 
 ```sql
--- SELECT utilizado.
+-- SELECT * FROM item_watchlist WHERE id_usuario = 5 AND id_serie = 5;
 ```
 
 **Resultado observado:**
 
-> Escreva aqui.
+> O gatilho BEFORE UPDATE interceptou a instrução antes da gravação: o status foi gravado como 'Quero Ver', mas o campo nota foi automaticamente persistido como NULL, garantindo a integridade sem disparar erro em tempo de execução.
 
 ---
 
@@ -173,10 +212,20 @@ Crie uma transação coerente com o domínio.
 
 **Objetivo:**
 
-> Escreva aqui.
+> Registrar simultaneamente um novo usuário e associar a sua primeira série de interesse na watchlist, consolidando a operação em lote no banco.
 
 ```sql
 START TRANSACTION;
+
+INSERT INTO usuario (nome, email, data_cadastro)
+VALUES ('Juliana Ferreira', 'juliana.f@email.com', '2026-05-10');
+
+SET @id_novo_usuario = LAST_INSERT_ID();
+
+INSERT INTO item_watchlist (id_usuario, id_serie, status_assistindo, nota, comentario)
+VALUES (@id_novo_usuario, 1, 'Quero Ver', NULL, 'Adicionada na criação da conta');
+
+COMMIT;
 
 -- operações
 
@@ -185,7 +234,7 @@ COMMIT;
 
 **O que aconteceu após o COMMIT?**
 
-> Escreva aqui.
+> As duas inclusões foram gravadas de forma permanente e atômica nas tabelas usuario e item_watchlist. Ambas as linhas passam a ser visíveis por todas as conexões simultâneas do banco.
 
 ---
 
@@ -204,18 +253,19 @@ ROLLBACK;
 **Verificação antes:**
 
 ```sql
--- SELECT
+-- SELECT COUNT(*) AS total_usuarios FROM usuario;
 ```
 
 **Verificação depois:**
 
 ```sql
--- SELECT
+--SELECT COUNT(*) AS total_usuarios FROM usuario;
+SELECT * FROM item_watchlist WHERE id_usuario = 1;
 ```
 
 **O que o ROLLBACK fez?**
 
-> Escreva aqui.
+> Desfez todas as modificações realizadas após a instrução START TRANSACTION. O novo usuário não foi persistido e os itens da watchlist do usuário 1 foram restaurados ao seu estado original antes do bloco transacional.
 
 ---
 
@@ -223,15 +273,15 @@ ROLLBACK;
 
 ## COMMIT
 
-> Explique com suas palavras.
+> Confirma e grava definitivamente todas as operações executadas dentro da transação corrente, tornando as modificações permanentes no armazenamento do banco de dados.
 
 ## ROLLBACK
 
-> Explique com suas palavras.
+> Aborta a transação e descarta todas as operações realizadas desde o início do bloco, restaurando os dados para o estado exato em que estavam antes do START TRANSACTION.
 
 ## Por que transações são importantes?
 
-> Escreva aqui.
+> Garantem os princípios ACID (Atomicidade, Consistência, Isolamento e Durabilidade). Em sistemas relacionais, impedem inconsistências graves decorrentes de falhas de hardware, erros de rede ou operações parciais (por exemplo, criar um usuário e falhar ao registrar seus vínculos obrigatórios).
 
 ---
 
@@ -262,15 +312,26 @@ Estrutura esperada:
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual é a listagem analítica das séries, exibindo o título, o serviço de streaming, a quantidade total de adições na watchlist e a quantidade de resenhas com nota?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    s.titulo AS serie,
+    p.nome_plataforma AS plataforma,
+    COUNT(w.id_usuario) AS total_watchlist,
+    COUNT(w.nota) AS total_avaliacoes
+FROM serie AS s
+INNER JOIN plataforma AS p
+    ON s.id_plataforma = p.id_plataforma
+LEFT JOIN item_watchlist AS w
+    ON s.id_serie = w.id_serie
+GROUP BY s.id_serie, s.titulo, p.nome_plataforma
+ORDER BY total_watchlist DESC;
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> Realiza a junção entre serie e plataforma e utiliza LEFT JOIN com item_watchlist para não omitir produções recém-adicionadas sem audiência. Agrupa pelas chaves e calcula métricas simultâneas de adoção.
 
 ---
 
@@ -278,15 +339,27 @@ Estrutura esperada:
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais usuários atribuíram a alguma série uma nota estritamente maior que a média global de todas as notas do sistema?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    u.id_usuario, 
+    u.nome, 
+    w.id_serie, 
+    w.nota
+FROM usuario AS u
+INNER JOIN item_watchlist AS w
+    ON u.id_usuario = w.id_usuario
+WHERE w.nota > (
+    SELECT AVG(nota)
+    FROM item_watchlist
+    WHERE nota IS NOT NULL
+);
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> A subconsulta calcula o valor escalar da média aritmética geral do sistema; a consulta externa junta usuários e itens, filtrando os registros que superam essa média.
 
 ---
 
@@ -295,12 +368,12 @@ Estrutura esperada:
 **Nome:**
 
 ```text
-
+vw_estatisticas_series
 ```
 
 **Por que é importante?**
 
-> Escreva aqui.
+> Fornece um painel agregado completo com a contagem de interessados, total de avaliações, nota mínima, nota máxima e média aritmética por título, abstraindo agrupamentos para relatórios e dashboards.
 
 ---
 
@@ -309,18 +382,18 @@ Estrutura esperada:
 **Nome:**
 
 ```text
-
+sp_atualizar_status_watchlist
 ```
 
 **Entrada:**
 
 ```text
-
+p_id_usuario INT, p_id_serie INT, p_novo_status VARCHAR(20), p_nota DECIMAL(3,1)
 ```
 
 **Resultado:**
 
-> Escreva aqui.
+> Atualiza o status e a nota do item aplicando as validações de negócio e retornando mensagens de feedback ao cliente.
 
 ---
 
@@ -329,12 +402,12 @@ Estrutura esperada:
 **Nome:**
 
 ```text
-
+fn_classificar_desempenho_serie
 ```
 
 **O que retorna?**
 
-> Escreva aqui.
+> Retorna um VARCHAR(30) classificando a aprovação da série em categorias conceituais ('Excelente', 'Bom', 'Regular / Baixo' ou 'Sem Avaliações').
 
 ---
 
@@ -343,12 +416,12 @@ Estrutura esperada:
 **Nome:**
 
 ```text
-
+trg_validar_status_nota_bi / trg_validar_status_nota_bu
 ```
 
 **Regra automatizada:**
 
-> Escreva aqui.
+> Força NEW.nota = NULL caso o status atribuído seja 'Quero Ver', impedindo inconsistências diretamente na camada de persistência.
 
 ---
 
@@ -395,9 +468,9 @@ O aluno deverá ser capaz de:
 
 | Problema | Causa | Solução |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Comportamento de autocommit impedindo teste de ROLLBACK | Modo padrão do Workbench com autocommit ativo | Uso explícito da instrução START TRANSACTION; antes do bloco de comandos |
+| Disparo de gatilho em updates manuais | O gatilho original cobria apenas inserções (BEFORE INSERT) | Criação do gatilho espelho para BEFORE UPDATE |
+| Erro de variável nula em subconsulta escalar | Cálculo de média executado em tabelas sem notas | Inclusão da cláusula WHERE nota IS NOT NULL |
 
 ---
 
