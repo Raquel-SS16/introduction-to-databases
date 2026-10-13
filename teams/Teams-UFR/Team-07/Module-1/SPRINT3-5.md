@@ -175,12 +175,14 @@ Ordem recomendada:
 
 | Tabela | Quantidade prevista | Depende de outra tabela? |
 |---|---:|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
 
+| escola | 5 registros | Não (Tabela independente / Pai)
+
+| categoria | 5 registros | Não (Tabela independente / Pai)
+
+| colaborador | 5 registros | Não (Tabela independente / Pai)
+
+| atleta | 5 registros | Sim (escola e categoria)
 ---
 
 # 8. INSERTs realizados
@@ -189,12 +191,19 @@ Ordem recomendada:
 
 **Nome:**
 
-```text
+```
+escola
 
 ```
 
-```sql
--- Cole aqui os INSERTs realizados.
+```
+-- Inserção de Escolas parceiras
+INSERT INTO escola (nome_escola, tipo_rede, bairro, cidade) VALUES
+('E. E. Dom Aquino Corrêa', 'Pública', 'Centro', 'Rondonópolis'),
+('E. M. Profª Icelina G. Carvalho', 'Pública', 'Vila Operária', 'Rondonópolis'),
+('E. E. Adventista de Rondonópolis', 'Privada', 'Jardim Atlântico', 'Rondonópolis'),
+('E. E. Antonio Guimarães Balbino', 'Pública', 'Sagrada Família', 'Rondonópolis'),
+('E. M. Albano Soares Ferreira', 'Pública', 'Jardim das Flores', 'Rondonópolis');
 
 ```
 
@@ -202,38 +211,55 @@ Ordem recomendada:
 
 **Nome:**
 
-```text
-
+```
+categoria
 ```
 
-```sql
--- Cole aqui os INSERTs realizados.
-
+```
+-- Inserção de Categorias de Atletismo
+INSERT INTO categoria (nome_categoria, idade_minima, idade_maxima, genero_categoria) VALUES
+('Sub-14 Misto', 12, 13, 'Misto'),
+('Sub-16 Masculino', 14, 15, 'Masculino'),
+('Sub-16 Feminino', 14, 15, 'Feminino'),
+('Sub-18 Masculino', 16, 17, 'Masculino'),
+('Sub-18 Feminino', 16, 17, 'Feminino');
 ```
 
 ## Tabela 3
 
 **Nome:**
 
-```text
-
+```
+colaborador
 ```
 
-```sql
--- Cole aqui os INSERTs realizados.
-
+```
+-- Inserção de Colaboradores e Diretoria
+INSERT INTO colaborador (nome_completo, cpf, cargo_funcao, telefone, data_cadastro) VALUES
+('Walter Anacleto Salido de Souza', '11122233344', 'Presidente / Treinador', '(66) 99911-2233', '2026-01-15'),
+('Vanessa Salido', '22233344455', 'Primeira Tesoureira', '(66) 99922-3344', '2026-01-15'),
+('Carlos Eduardo Mendes', '33344455666', 'Treinador de Saltos', '(66) 99933-4455', '2026-02-10'),
+('Ana Paula Silveira', '44455667788', 'Professora de Apoio / Base', '(66) 99944-5566', '2026-02-15'),
+('Marcos Vinícius Rocha', '55566778899', 'Preparador Físico', '(66) 99955-6677', '2026-03-01');
 ```
 
 ## Tabela 4
 
 **Nome:**
 
-```text
+```
+atleta
 
 ```
 
-```sql
--- Cole aqui os INSERTs realizados.
+```
+-- Inserção de Atletas vinculados às Escolas e Categorias
+INSERT INTO atleta (nome_completo, cpf, data_nascimento, nome_mae, nome_pai, endereco, id_escola, id_categoria, observacoes_medicas) VALUES
+('Gabriel Santos Silva', '66677788899', '2012-04-12', 'Maria Santos Silva', 'João Silva', 'Rua das Flores, 123, Centro', 1, 1, 'Nenhuma restrição médica.'),
+('Beatriz Lima Souza', '77788899900', '2010-08-22', 'Ana Lima Souza', 'Carlos Souza', 'Av. dos Estados, 456, Vila Operária', 2, 3, 'Alergia leve a poeira.'),
+('Lucas Gabriel Pereira', '88899900011', '2011-01-15', 'Juliana Pereira', 'Marcos Pereira', 'Rua 7, 789, Jardim Atlântico', 3, 2, 'Usa óculos para esporte.'),
+('Larissa Vitória Martins', '99900011122', '2009-09-30', 'Fernanda Martins', 'Roberto Martins', 'Rua dos Girassóis, 321, Sagrada Família', 4, 5, 'Sem restrições.'),
+('Matheus Henrique Costa', '00011122233', '2009-05-18', 'Sandra Costa', 'Paulo Costa', 'Av. Brasil, 654, Jardim das Flores', 5, 4, 'Acompanhamento ortopédico de rotina.');
 
 ```
 
@@ -327,9 +353,12 @@ Registre os resultados:
 
 | Restrição testada | O que foi testado? | Resultado |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+
+| UNIQUE | Tentativa de cadastrar um segundo atleta utilizando um número de CPF (cpf) já existente na tabela atleta. | O SGBD bloqueou a operação e retornou um erro de violação da restrição de chave única (Duplicate entry), garantindo a unicidade do documento.
+
+| NOT NULL | Tentativa de inserir uma nova escola omitindo o preenchimento do campo obrigatório nome_escola. | O SGBD impediu a execução do comando, gerando um erro informando que o campo não pode receber valores nulos (Column 'nome_escola' cannot be null).
+
+| FOREIGN KEY | Tentativa de cadastrar um atleta informando um código de escola (id_escola = 99) inexistente na tabela pai escola. | O SGBD bloqueou a inserção devido à violação da integridade referencial (Foreign key constraint fails), impedindo registros órfãos.
 
 > Não mantenha comandos propositalmente inválidos no `SPRINT3-5.sql` final.
 
@@ -390,36 +419,45 @@ Execute pelo menos:
 
 ## UPDATE 1
 
-```sql
--- Cole aqui.
+```
+Atualizando o telefone de contato de um colaborador na tabela colaborador
+UPDATE colaborador
+SET telefone = '(66) 99988-7766'
+WHERE id_colaborador = 2;
 
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Foi atualizado o número de telefone da primeira tesoureira (Vanessa Salido, ID 2) para o novo contato telefônico institucional da associação.
 
 ## UPDATE 2
 
-```sql
--- Cole aqui.
+```
+-- Atualizando as observações médicas de um atleta na tabela atleta
+UPDATE atleta
+SET observacoes_medicas = 'Alergia leve a poeira. Uso contínuo de antialérgico sob prescrição.'
+WHERE id_atleta = 2;
 
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Foram detalhadas as restrições e orientações médicas da atleta Beatriz Lima Souza (ID 2), aprimorando o cadastro de acompanhamento de saúde da associação.
 
 ## UPDATE 3
 
-```sql
--- Cole aqui.
+```
+-- Atualizando a faixa etária de uma categoria de atletismo na tabela categoria
+UPDATE categoria
+SET idade_maxima = 16
+WHERE id_categoria = 3;
 
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Foi corrigida a idade máxima limite da categoria 'Sub-16 Feminino' (ID 3), ajustando a regra de enquadramento das atletas conforme as novas diretrizes da federação.
 
 ---
 
@@ -497,26 +535,36 @@ Execute pelo menos:
 
 ## DELETE 1
 
-```sql
--- Cole aqui.
+```
+-- Criando e removendo um registro temporário para demonstração de exclusão segura
+INSERT INTO escola (nome_escola, tipo_rede, bairro, cidade) 
+VALUES ('Escola Teste Temporária', 'Pública', 'Teste', 'Rondonópolis');
+
+-- Removendo o registro temporário criado
+DELETE FROM escola
+WHERE nome_escola = 'Escola Teste Temporária';
 
 ```
 
 **Registro removido:**
 
-> Escreva aqui.
+> Foi removido um registro temporário inserido para fins de validação da operação de exclusão (DELETE), garantindo que nenhuma dependência relacional ativa fosse afetada.
 
 ## DELETE 2
 
-```sql
--- Cole aqui.
+```
+-- Removendo um registro de colaborador inativo ou de teste na tabela colaborador
+INSERT INTO colaborador (nome_completo, cpf, cargo_funcao, telefone, data_cadastro) 
+VALUES ('Colaborador Temporário', '99988877766', 'Apoio Eventual', '(66) 99900-1122', '2026-03-05');
+
+DELETE FROM colaborador
+WHERE cpf = '99988877766';
 
 ```
 
 **Registro removido:**
 
-> Escreva aqui.
-
+> Foi removido o registro de um colaborador temporário previamente cadastrado para teste de controle de exclusão, mantendo a tabela limpa e restrita aos membros efetivos da diretoria e comissão técnica.
 ---
 
 # 19. Conferindo os registros
@@ -543,125 +591,229 @@ Depois execute a alteração e consulte novamente.
 
 **Não entregue o código abaixo sem adaptação.**
 
-```sql
-USE nome_do_banco;
+```-- ============================================================
+-- SPRINT 3/5 — MANIPULAÇÃO DE DADOS (DML)
+-- PROJETO: Gestão de Atletas e Colaboradores da RAAEI
+-- AUTOR: Walter Anacleto Salido de Souza
+-- ============================================================
 
--- INSERTS
+USE db_raaei;
 
-INSERT INTO tabela_a (
-    campo_a1,
-    campo_a2
-)
-VALUES (
-    'Valor 1',
-    'Valor 2'
-);
+-- ------------------------------------------------------------
+-- 1. INSERÇÃO DE DADOS (DML - INSERT)
+-- ------------------------------------------------------------
 
-INSERT INTO tabela_a (
-    campo_a1,
-    campo_a2
-)
-VALUES
-    ('Valor 3', 'Valor 4'),
-    ('Valor 5', 'Valor 6'),
-    ('Valor 7', 'Valor 8');
+-- Inserindo Escolas parceiras (Tabela independente)
+INSERT INTO escola (nome_escola, tipo_rede, bairro, cidade) VALUES
+('E. E. Dom Aquino Corrêa', 'Pública', 'Centro', 'Rondonópolis'),
+('E. M. Profª Icelina G. Carvalho', 'Pública', 'Vila Operária', 'Rondonópolis'),
+('E. E. Adventista de Rondonópolis', 'Privada', 'Jardim Atlântico', 'Rondonópolis'),
+('E. E. Antonio Guimarães Balbino', 'Pública', 'Sagrada Família', 'Rondonópolis'),
+('E. M. Albano Soares Ferreira', 'Pública', 'Jardim das Flores', 'Rondonópolis');
 
-INSERT INTO tabela_b (
-    id_a,
-    campo_b1
-)
-VALUES (
-    1,
-    'Outro valor'
-);
+-- Inserindo Categorias de Atletismo (Tabela independente)
+INSERT INTO categoria (nome_categoria, idade_minima, idade_maxima, genero_categoria) VALUES
+('Sub-14 Misto', 12, 13, 'Misto'),
+('Sub-16 Masculino', 14, 15, 'Masculino'),
+('Sub-16 Feminino', 14, 15, 'Feminino'),
+('Sub-18 Masculino', 16, 17, 'Masculino'),
+('Sub-18 Feminino', 16, 17, 'Feminino');
 
--- VERIFICAÇÕES
+-- Inserindo Colaboradores e Diretoria (Tabela independente)
+INSERT INTO colaborador (nome_completo, cpf, cargo_funcao, telefone, data_cadastro) VALUES
+('Walter Anacleto Salido de Souza', '11122233344', 'Presidente / Treinador', '(66) 99911-2233', '2026-01-15'),
+('Vanessa Salido', '22233344455', 'Primeira Tesoureira', '(66) 99922-3344', '2026-01-15'),
+('Carlos Eduardo Mendes', '33344455666', 'Treinador de Saltos', '(66) 99933-4455', '2026-02-10'),
+('Ana Paula Silveira', '44455667788', 'Professora de Apoio / Base', '(66) 99944-5566', '2026-02-15'),
+('Marcos Vinícius Rocha', '55566778899', 'Preparador Físico', '(66) 99955-6677', '2026-03-01');
 
-SELECT * FROM tabela_a;
-SELECT * FROM tabela_b;
+-- Inserindo Atletas vinculados às Escolas e Categorias (Tabela dependente)
+INSERT INTO atleta (nome_completo, cpf, data_nascimento, nome_mae, nome_pai, endereco, id_escola, id_categoria, observacoes_medicas) VALUES
+('Gabriel Santos Silva', '66677788899', '2012-04-12', 'Maria Santos Silva', 'João Silva', 'Rua das Flores, 123, Centro', 1, 1, 'Nenhuma restrição médica.'),
+('Beatriz Lima Souza', '77788899900', '2010-08-22', 'Ana Lima Souza', 'Carlos Souza', 'Av. dos Estados, 456, Vila Operária', 2, 3, 'Alergia leve a poeira.'),
+('Lucas Gabriel Pereira', '88899900011', '2011-01-15', 'Juliana Pereira', 'Marcos Pereira', 'Rua 7, 789, Jardim Atlântico', 3, 2, 'Usa óculos para esporte.'),
+('Larissa Vitória Martins', '99900011122', '2009-09-30', 'Fernanda Martins', 'Roberto Martins', 'Rua dos Girassóis, 321, Sagrada Família', 4, 5, 'Sem restrições.'),
+('Matheus Henrique Costa', '00011122233', '2009-05-18', 'Sandra Costa', 'Paulo Costa', 'Av. Brasil, 654, Jardim das Flores', 5, 4, 'Acompanhamento ortopédico de rotina.');
 
--- UPDATES
+-- ------------------------------------------------------------
+-- 2. VERIFICAÇÃO INICIAL DOS DADOS (SELECT)
+-- ------------------------------------------------------------
+SELECT * FROM escola;
+SELECT * FROM categoria;
+SELECT * FROM colaborador;
+SELECT * FROM atleta;
 
-UPDATE tabela_a
-SET campo_a1 = 'Valor atualizado'
-WHERE id_a = 1;
+-- ------------------------------------------------------------
+-- 3. ATUALIZAÇÃO DE DADOS (DML - UPDATE)
+-- ------------------------------------------------------------
 
-UPDATE tabela_a
-SET campo_a2 = 'Outro valor'
-WHERE id_a = 2;
+-- UPDATE 1: Atualizando o telefone de contato de um colaborador
+UPDATE colaborador
+SET telefone = '(66) 99988-7766'
+WHERE id_colaborador = 2;
 
-UPDATE tabela_b
-SET campo_b1 = 'Atualizado'
-WHERE id_b = 1;
+-- UPDATE 2: Atualizando as observações médicas de um atleta
+UPDATE atleta
+SET observacoes_medicas = 'Alergia leve a poeira. Uso contínuo de antialérgico sob prescrição.'
+WHERE id_atleta = 2;
 
--- DELETES
+-- UPDATE 3: Atualizando a idade máxima de uma categoria de atletismo
+UPDATE categoria
+SET idade_maxima = 16
+WHERE id_categoria = 3;
 
-DELETE FROM tabela_b
-WHERE id_b = 3;
+-- ------------------------------------------------------------
+-- 4. REMOÇÃO DE DADOS (DML - DELETE)
+-- ------------------------------------------------------------
 
-DELETE FROM tabela_a
-WHERE id_a = 5;
+-- Inserindo e removendo um registro temporário para demonstração segura de exclusão
+INSERT INTO escola (nome_escola, tipo_rede, bairro, cidade) 
+VALUES ('Escola Teste Temporária', 'Pública', 'Teste', 'Rondonópolis');
+
+DELETE FROM escola
+WHERE nome_escola = 'Escola Teste Temporária';
+
+-- Inserindo e removendo um colaborador temporário para teste de exclusão
+INSERT INTO colaborador (nome_completo, cpf, cargo_funcao, telefone, data_cadastro) 
+VALUES ('Colaborador Temporário', '99988877766', 'Apoio Eventual', '(66) 99900-1122', '2026-03-05');
+
+DELETE FROM colaborador
+WHERE cpf = '99988877766';
+
+-- ------------------------------------------------------------
+-- 5. VERIFICAÇÃO FINAL DOS DADOS (SELECT)
+-- ------------------------------------------------------------
+SELECT * FROM colaborador;
+SELECT * FROM atleta;
+SELECT * FROM categoria;
+SELECT * FROM escola;
 ```
 
 ---
 
 # 21. Estrutura recomendada do SPRINT3-5.sql
 
-```sql
+```
 -- ============================================================
 -- IDENTIFICAÇÃO
 -- ============================================================
 
--- Aluno:
--- Banco:
+-- Aluno: Walter Anacleto Salido de Souza
+-- Banco: db_raaei
 
 
 -- ============================================================
 -- SELECIONAR O BANCO
 -- ============================================================
 
-USE nome_do_banco;
+USE db_raaei;
 
 
 -- ============================================================
--- INSERTS — TABELA 1
+-- INSERTS — TABELA 1 (escola)
 -- ============================================================
+
+INSERT INTO escola (nome_escola, tipo_rede, bairro, cidade) VALUES
+('E. E. Dom Aquino Corrêa', 'Pública', 'Centro', 'Rondonópolis'),
+('E. M. Profª Icelina G. Carvalho', 'Pública', 'Vila Operária', 'Rondonópolis'),
+('E. E. Adventista de Rondonópolis', 'Privada', 'Jardim Atlântico', 'Rondonópolis'),
+('E. E. Antonio Guimarães Balbino', 'Pública', 'Sagrada Família', 'Rondonópolis'),
+('E. M. Albano Soares Ferreira', 'Pública', 'Jardim das Flores', 'Rondonópolis');
 
 
 -- ============================================================
--- INSERTS — TABELA 2
+-- INSERTS — TABELA 2 (categoria)
 -- ============================================================
+
+INSERT INTO categoria (nome_categoria, idade_minima, idade_maxima, genero_categoria) VALUES
+('Sub-14 Misto', 12, 13, 'Misto'),
+('Sub-16 Masculino', 14, 15, 'Masculino'),
+('Sub-16 Feminino', 14, 15, 'Feminino'),
+('Sub-18 Masculino', 16, 17, 'Masculino'),
+('Sub-18 Feminino', 16, 17, 'Feminino');
 
 
 -- ============================================================
--- INSERTS — TABELA 3
+-- INSERTS — TABELA 3 (colaborador)
 -- ============================================================
+
+INSERT INTO colaborador (nome_completo, cpf, cargo_funcao, telefone, data_cadastro) VALUES
+('Walter Anacleto Salido de Souza', '11122233344', 'Presidente / Treinador', '(66) 99911-2233', '2026-01-15'),
+('Vanessa Salido', '22233344455', 'Primeira Tesoureira', '(66) 99922-3344', '2026-01-15'),
+('Carlos Eduardo Mendes', '33344455666', 'Treinador de Saltos', '(66) 99933-4455', '2026-02-10'),
+('Ana Paula Silveira', '44455667788', 'Professora de Apoio / Base', '(66) 99944-5566', '2026-02-15'),
+('Marcos Vinícius Rocha', '55566778899', 'Preparador Físico', '(66) 99955-6677', '2026-03-01');
 
 
 -- ============================================================
--- INSERTS — TABELA 4
+-- INSERTS — TABELA 4 (atleta)
 -- ============================================================
+
+INSERT INTO atleta (nome_completo, cpf, data_nascimento, nome_mae, nome_pai, endereco, id_escola, id_categoria, observacoes_medicas) VALUES
+('Gabriel Santos Silva', '66677788899', '2012-04-12', 'Maria Santos Silva', 'João Silva', 'Rua das Flores, 123, Centro', 1, 1, 'Nenhuma restrição médica.'),
+('Beatriz Lima Souza', '77788899900', '2010-08-22', 'Ana Lima Souza', 'Carlos Souza', 'Av. dos Estados, 456, Vila Operária', 2, 3, 'Alergia leve a poeira.'),
+('Lucas Gabriel Pereira', '88899900011', '2011-01-15', 'Juliana Pereira', 'Marcos Pereira', 'Rua 7, 789, Jardim Atlântico', 3, 2, 'Usa óculos para esporte.'),
+('Larissa Vitória Martins', '99900011122', '2009-09-30', 'Fernanda Martins', 'Roberto Martins', 'Rua dos Girassóis, 321, Sagrada Família', 4, 5, 'Sem restrições.'),
+('Matheus Henrique Costa', '00011122233', '2009-05-18', 'Sandra Costa', 'Paulo Costa', 'Av. Brasil, 654, Jardim das Flores', 5, 4, 'Acompanhamento ortopédico de rotina.');
 
 
 -- ============================================================
 -- VERIFICAÇÕES
 -- ============================================================
 
+SELECT * FROM escola;
+SELECT * FROM categoria;
+SELECT * FROM colaborador;
+SELECT * FROM atleta;
+
 
 -- ============================================================
 -- UPDATES
 -- ============================================================
+
+-- UPDATE 1: Atualizando o telefone de contato de um colaborador
+UPDATE colaborador
+SET telefone = '(66) 99988-7766'
+WHERE id_colaborador = 2;
+
+-- UPDATE 2: Atualizando as observações médicas de um atleta
+UPDATE atleta
+SET observacoes_medicas = 'Alergia leve a poeira. Uso contínuo de antialérgico sob prescrição.'
+WHERE id_atleta = 2;
+
+-- UPDATE 3: Atualizando a idade máxima de uma categoria de atletismo
+UPDATE categoria
+SET idade_maxima = 16
+WHERE id_categoria = 3;
 
 
 -- ============================================================
 -- DELETES
 -- ============================================================
 
+-- Inserindo e removendo um registro temporário para demonstração segura de exclusão em escola
+INSERT INTO escola (nome_escola, tipo_rede, bairro, cidade) 
+VALUES ('Escola Teste Temporária', 'Pública', 'Teste', 'Rondonópolis');
+
+DELETE FROM escola
+WHERE nome_escola = 'Escola Teste Temporária';
+
+-- Inserindo e removendo um colaborador temporário para teste de exclusão em colaborador
+INSERT INTO colaborador (nome_completo, cpf, cargo_funcao, telefone, data_cadastro) 
+VALUES ('Colaborador Temporário', '99988877766', 'Apoio Eventual', '(66) 99900-1122', '2026-03-05');
+
+DELETE FROM colaborador
+WHERE cpf = '99988877766';
+
 
 -- ============================================================
 -- VERIFICAÇÃO FINAL
 -- ============================================================
 
+SELECT * FROM escola;
+SELECT * FROM categoria;
+SELECT * FROM colaborador;
+SELECT * FROM atleta;
 ```
 
 ---
@@ -722,11 +874,14 @@ SPRINT3-5.sql
 
 | Tabela | Quantidade aproximada de registros ao final |
 |---|---:|
-|  |  |
-|  |  |
-|  |  |
-|  |  |
-|  |  |
+
+| escola | 5 registros
+
+| categoria | 5 registros
+
+| colaborador | 5 registros
+
+| atleta | 5 registros
 
 ---
 
@@ -736,24 +891,24 @@ SPRINT3-5.sql
 
 Quantidade aproximada de registros inseridos:
 
-```text
-
+```
+22 registros no total (sendo 5 em cada tabela principal, além de 2 registros temporários utilizados para validação das operações de exclusão).
 ```
 
 ## UPDATE
 
 Quantidade de operações:
 
-```text
-
+```
+3 operações estruturadas (atualização de contato de colaborador, refinamento de observação médica de atleta e ajuste de faixa etária em categoria).
 ```
 
 ## DELETE
 
 Quantidade de operações:
 
-```text
-
+```
+2 operações controladas (exclusão de registros temporários criados para teste de integridade em escola e colaborador).
 ```
 
 ---
@@ -762,9 +917,12 @@ Quantidade de operações:
 
 | Problema | Possível causa | Solução aplicada |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+
+| Duplicate entry | Tentativa de inserir um registro com um valor duplicado em um campo configurado com a restrição UNIQUE (como CPF ou e-mail). | Validação prévia dos dados de cadastro e restrição da inserção a valores únicos e válidos.
+
+| Cannot add or update a child row | Violação de integridade referencial ao tentar inserir um registro dependente referenciando uma chave estrangeira inexistente na tabela pai (FOREIGN KEY). | Garantia da ordem correta de inserção, populando primeiramente as tabelas independentes (escola, categoria) antes da tabela dependente (atleta).
+
+| Column cannot be null | Omissão de valor em um campo estruturado obrigatoriamente com a restrição NOT NULL durante a operação de inserção. | Inclusão explícita de todos os campos obrigatórios nos comandos INSERT correspondentes.
 
 Mensagens que podem aparecer:
 
