@@ -115,31 +115,24 @@ Todo projeto deverá possuir um banco de dados próprio.
 
 Estrutura genérica:
 
-```sql
-CREATE DATABASE nome_do_banco;
-
-USE nome_do_banco;
-```
-
-Exemplo:
-
-```sql
-CREATE DATABASE loja_virtual;
-
-USE loja_virtual;
-```
 
 ## Código utilizado no seu projeto
 
-```sql
--- Copie aqui o código utilizado.
+```
+-- Criação do Banco de Dados
+CREATE DATABASE IF NOT EXISTS db_raaei
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
 
+-- 
+Selecionando o Banco de Dados
+USE db_raaei;
 ```
 
 ## Nome definitivo do banco
 
-```text
-
+```
+db_raaei
 ```
 
 ---
@@ -164,14 +157,14 @@ TEXT
 
 Exemplos:
 
-```sql
-id_cliente INT
-nome VARCHAR(120)
-cpf CHAR(11)
-data_nascimento DATE
-preco DECIMAL(10,2)
-ativo BOOLEAN
-descricao TEXT
+```
+INT para chaves primárias e idades.
+
+VARCHAR(150) para nomes, cargos e redes de ensino.
+
+CHAR(11) para CPFs (tamanho fixo e previsível).
+
+DATE para datas de nascimento e cadastro.
 ```
 
 ## Atenção
@@ -210,12 +203,14 @@ CREATE TABLE nome_tabela (
 
 | Nº | Nome da tabela | Finalidade |
 |---:|---|---|
-| 1 |  |  |
-| 2 |  |  |
-| 3 |  |  |
-| 4 |  |  |
-| 5 |  |  |
-| 6 |  |  |
+
+| 1	| escola | Armazena as instituições de ensino parceiras onde os atletas estão matriculados, detalhando rede e localização.
+
+| 2 | categoria | Define as faixas etárias, modalidades e classificações do atletismo (ex: Sub-16, Sub-18, Adulto, PCD).
+
+| 3 | colaborador | Gerencia os dados cadastrais da equipe técnica, diretoria e voluntários atuantes na associação.
+
+| 4 | atleta | Tabela central do sistema que consolida as informações pessoais dos participantes, vinculando-os à escola e à categoria.
 
 ---
 
@@ -231,27 +226,13 @@ Regra prática:
 3. criar por último as tabelas associativas, quando existirem.
 ```
 
-Exemplo:
-
-```text
-CLIENTE
-PRODUTO
-    ↓
-PEDIDO
-    ↓
-ITEM_PEDIDO
-```
-
-Se `PEDIDO` possui uma FK para `CLIENTE`, então `CLIENTE` deve existir antes de `PEDIDO`.
 
 ## Ordem definida para o seu projeto
 
-1. 
-2. 
-3. 
-4. 
-5. 
-6. 
+1. escola (Tabela independente, sem chaves estrangeiras)
+2. categoria (Tabela independente, sem chaves estrangeiras)
+3. colaborador (Tabela independente, sem chaves estrangeiras)
+4. atleta (Tabela dependente, pois possui chaves estrangeiras referenciando escola e categoria)
 
 ---
 
@@ -275,10 +256,14 @@ id_cliente INT PRIMARY KEY AUTO_INCREMENT
 
 | Tabela | Chave primária | Utiliza `AUTO_INCREMENT`? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+
+| escola | id_escola | Sim
+
+| categoria | id_categoria | Sim
+
+| colaborador | id_colaborador | Sim
+
+| atleta | id_atleta | Sim
 
 ---
 
@@ -298,9 +283,12 @@ Não utilize `NOT NULL` indiscriminadamente. A restrição deve refletir uma reg
 
 | Tabela | Campo | Por que é obrigatório? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+
+| escola | nome_escola | Nenhuma instituição de ensino pode ser cadastrada sem a identificação do seu nome oficial.
+
+| atleta | cpf | O CPF é o documento de identificação principal e único do atleta, indispensável para evitar duplicidade e garantir a veracidade do cadastro.
+
+| colaborador | cargo_funcao | Todo colaborador ou dirigente da associação precisa ter sua função ou cargo na diretoria devidamente especificado.
 
 ---
 
@@ -324,16 +312,16 @@ cpf CHAR(11) NOT NULL UNIQUE
 
 | Tabela | Campo | Por que não pode se repetir? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
 
-Caso nenhuma seja necessária, justifique:
 
-> Escreva aqui.
+| atleta | cpf | O CPF é um documento de identificação de pessoa física exclusivo e individual, impedindo que o mesmo atleta seja cadastrado mais de uma vez no sistema.
+
+| colaborador | cpf | Garante que cada membro, técnico ou dirigente da associação possua um cadastro único baseado no seu documento pessoal, evitando duplicidade na gestão de pessoal. 
+
 
 ---
 
-# 10. DEFAULT
+# 10. DEFAULT - 
 
 Utilize `DEFAULT` quando existir um valor padrão coerente.
 
@@ -353,12 +341,9 @@ status VARCHAR(20) NOT NULL DEFAULT 'ATIVO'
 
 | Tabela | Campo | DEFAULT | Justificativa |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
 
-Caso não utilize `DEFAULT`, justifique:
+| escola | cidade | 'Rondonópolis' |Como a grande maioria das escolas parceiras da associação está situada no município sede, define-se Rondonópolis como valor padrão para otimizar o cadastro.
 
-> Escreva aqui.
 
 ---
 
@@ -407,9 +392,10 @@ Verifique se:
 
 | Tabela | Campo FK | Referencia | Relacionamento |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+
+| atleta | id_escola | escola(id_escola) | Uma escola pode possuir vários atletas cadastrados, mas cada atleta está vinculado a uma única escola.
+
+| atleta | id_categoria | categoria(id_categoria) | Uma categoria abrange vários atletas, enquanto cada atleta pertence obrigatoriamente a uma categoria específica.
 
 ---
 
@@ -459,7 +445,7 @@ CREATE TABLE tabela_associativa (
 ## Seu banco possui relacionamento N:N?
 
 - [ ] Sim
-- [ ] Não
+- [ X ] Não
 
 Se sim, explique como foi implementado:
 
@@ -475,35 +461,15 @@ Exemplos:
 
 ### Adicionar coluna
 
-```sql
-ALTER TABLE nome_tabela
-ADD COLUMN novo_campo VARCHAR(100);
 ```
-
-### Modificar tipo
-
-```sql
-ALTER TABLE nome_tabela
-MODIFY COLUMN novo_campo VARCHAR(150);
-```
-
-### Adicionar restrição
-
-```sql
-ALTER TABLE nome_tabela
-ADD CONSTRAINT uq_nome UNIQUE (novo_campo);
-```
-
-## ALTER TABLE utilizado no projeto
-
-```sql
--- Cole aqui o comando executado.
+-- Adicionando uma coluna opcional para observações médicas futuras na tabela de atleta
+ALTER TABLE atleta ADD COLUMN observacoes_medicas TEXT;
 
 ```
 
 ### Explique a alteração
 
-> Escreva aqui.
+> A instrução ALTER TABLE foi utilizada para adicionar o campo observacoes_medicas do tipo TEXT na tabela atleta. Essa inclusão atende a uma necessidade prática da associação esportiva de registrar eventuais restrições de saúde, alergias ou cuidados especiais de cada atleta, complementando o cadastro sem interferir nas informações obrigatórias principais.
 
 ---
 
@@ -528,8 +494,13 @@ DROP TABLE tabela_teste;
 ## Código executado
 
 ```sql
--- Cole aqui o teste realizado.
+-- -- Criação de uma tabela temporária para teste controlado de exclusão
+CREATE TABLE tabela_teste (
+    id INT PRIMARY KEY
+);
 
+-- Remoção da tabela criada utilizando DROP TABLE
+DROP TABLE tabela_teste;
 ```
 
 ## Explique a diferença
@@ -546,11 +517,13 @@ e:
 DROP TABLE tabela;
 ```
 
-> Responda aqui.
+> DELETE FROM tabela; é um comando DML (Data Manipulation Language) que remove os registros (linhas) armazenados dentro da tabela, mas mantém intacta a sua estrutura física, colunas, tipos de dados e restrições. Os dados podem ser desfeitos caso haja uma transação ativa (ROLLBACK).
+
+> DROP TABLE tabela; é um comando DDL (Data Definition Language) que apaga e remove completamente a tabela inteira do banco de dados, incluindo todos os seus dados, índices, restrições e a sua própria estrutura física. Trata-se de uma operação irreversível na maioria dos SGBDs.
 
 ---
 
-# 15. Estrutura genérica completa para adaptar
+# 15. Estrutura genérica completa para adaptar 
 
 O modelo abaixo serve apenas como referência estrutural.
 
@@ -717,10 +690,14 @@ Faça isso para cada tabela criada.
 
 | Tabela | `DESCRIBE` executado? | Estrutura correta? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+
+| escola | Sim (DESCRIBE escola;) | Sim, confirmando a chave primária id_escola, os campos obrigatórios e o valor padrão para a cidade.
+
+| categoria | Sim (DESCRIBE categoria;) | Sim, validando a chave primária id_categoria e os atributos de faixa etária e gênero.
+
+| colaborador | Sim (DESCRIBE colaborador;) | Sim, verificando a chave primária id_colaborador, o CPF com restrição única e os cargos definidos.
+
+| atleta | Sim (DESCRIBE atleta;) | Sim, atestando a chave primária id_atleta, o CPF único e as chaves estrangeiras (id_escola e id_categoria).
 
 ---
 
@@ -809,9 +786,9 @@ Verifique:
 
 | Problema | Causa identificada | Como foi resolvido |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+
+| Aviso de banco de dados já existente ao reexecutar o script. | O comando CREATE DATABASE tentava criar um banco que já havia sido instanciado em testes anteriores. | Adicionada a cláusula IF NOT EXISTS junto ao nome do banco, permitindo a execução segura do script de ponta a ponta.
+
 
 Caso não encontre problemas:
 
@@ -825,6 +802,105 @@ Depois de testar cada parte, organize o código definitivo no arquivo:
 
 ```text
 SPRINT2-5.sql
+-- ============================================================
+-- SPRINT 2/5 — ESTRUTURA DDL DO BANCO DE DADOS
+-- PROJETO: Gestão de Atletas e Colaboradores da RAAEI
+-- AUTOR: Walter Anacleto Salido de Souza
+-- ============================================================
+
+-- 1. Criação e Seleção do Banco de Dados
+CREATE DATABASE IF NOT EXISTS db_raaei
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE db_raaei;
+
+-- ------------------------------------------------------------
+-- 2. Tabelas Independentes (Pais)
+-- ------------------------------------------------------------
+
+-- Tabela de Escolas parceiras
+CREATE TABLE escola (
+    id_escola INT PRIMARY KEY AUTO_INCREMENT,
+    nome_escola VARCHAR(150) NOT NULL,
+    tipo_rede VARCHAR(50) NOT NULL,
+    bairro VARCHAR(100),
+    cidade VARCHAR(100) NOT NULL DEFAULT 'Rondonópolis'
+);
+
+-- Tabela de Categorias do Atletismo
+CREATE TABLE categoria (
+    id_categoria INT PRIMARY KEY AUTO_INCREMENT,
+    nome_categoria VARCHAR(100) NOT NULL,
+    idade_minima INT NOT NULL,
+    idade_maxima INT NOT NULL,
+    genero_categoria VARCHAR(50) NOT NULL
+);
+
+-- Tabela de Colaboradores e Diretoria
+CREATE TABLE colaborador (
+    id_colaborador INT PRIMARY KEY AUTO_INCREMENT,
+    nome_completo VARCHAR(150) NOT NULL,
+    cpf CHAR(11) NOT NULL UNIQUE,
+    cargo_funcao VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    data_cadastro DATE NOT NULL
+);
+
+-- ------------------------------------------------------------
+-- 3. Tabelas Relacionadas (Filhas com Chaves Estrangeiras)
+-- ------------------------------------------------------------
+
+-- Tabela de Atletas da Associação
+CREATE TABLE atleta (
+    id_atleta INT PRIMARY KEY AUTO_INCREMENT,
+    nome_completo VARCHAR(150) NOT NULL,
+    cpf CHAR(11) NOT NULL UNIQUE,
+    data_nascimento DATE NOT NULL,
+    nome_mae VARCHAR(150),
+    nome_pai VARCHAR(150),
+    endereco VARCHAR(200) NOT NULL,
+    id_escola INT NOT NULL,
+    id_categoria INT NOT NULL,
+
+    CONSTRAINT fk_atleta_escola
+        FOREIGN KEY (id_escola)
+        REFERENCES escola(id_escola),
+
+    CONSTRAINT fk_atleta_categoria
+        FOREIGN KEY (id_categoria)
+        REFERENCES categoria(id_categoria)
+);
+
+-- ------------------------------------------------------------
+-- 4. Modificações Estruturais (ALTER TABLE)
+-- ------------------------------------------------------------
+
+-- Adicionando campo para registro de observações médicas dos atletas
+ALTER TABLE atleta ADD COLUMN observacoes_medicas TEXT;
+
+-- ------------------------------------------------------------
+-- 5. Exercício Controlado de DROP TABLE
+-- ------------------------------------------------------------
+
+-- Criação de tabela temporária de testes
+CREATE TABLE tabela_teste (
+    id_teste INT PRIMARY KEY
+);
+
+-- Remoção controlada da tabela temporária
+DROP TABLE tabela_teste;
+
+-- ------------------------------------------------------------
+-- 6. Comandos de Validação da Estrutura
+-- ------------------------------------------------------------
+
+DESCRIBE escola;
+DESCRIBE categoria;
+DESCRIBE colaborador;
+DESCRIBE atleta;
+
+SHOW CREATE TABLE atleta;
 ```
 
 Esse arquivo deverá conter **somente o SQL necessário para criar a estrutura final do projeto e os exercícios exigidos nesta Sprint**.
