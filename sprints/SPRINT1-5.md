@@ -35,12 +35,12 @@ Nesta Sprint 1/5, o foco é exclusivamente o **planejamento do banco de dados**.
 
 **Nome completo:**
 
-> Iuri Bravo Pereira Resmini.
+> Preencha aqui.
 
 **Nome escolhido para o banco de dados:**
 
-```
-gerenciamento_salao_beleza
+```text
+
 ```
 
 ---
@@ -51,9 +51,29 @@ Escolha um domínio para o banco de dados que será desenvolvido durante toda a 
 
 O tema é livre, desde que permita a criação de um banco relacional com múltiplas tabelas e relacionamentos coerentes.
 
+Alguns exemplos:
+
+- sistema acadêmico;
+- biblioteca;
+- clínica;
+- loja;
+- restaurante;
+- academia;
+- hotel;
+- oficina;
+- locadora;
+- e-commerce;
+- sistema de eventos;
+- sistema de transporte;
+- imobiliária;
+- pet shop;
+- escola;
+- campeonato esportivo;
+- outro domínio de interesse do aluno.
+
 ### Tema escolhido
 
-> Gerenciamento de salão de beleza.
+> Escreva aqui.
 
 ---
 
@@ -70,7 +90,7 @@ A descrição deve responder:
 
 ### Descrição
 
-> Esse sistema consite em resolver problemas de agendamentos, financeiro e estoque de salões de beleza. O sistema ficará disponível para colabores, tais como: Cabeleireiro(@), manicure, gerente, caixa, financeiro, entre outros. Para gerenciar o salão de beleza será necessário o armazenamento de tabelas com informações de Colaboradores, Clientes, Preços, Estoque, Financeiro. E operações de agendamento de cliente, registros de produtos, vendas do estoque, registros de clientes e colaboradores e atualização de preço.
+> Escreva aqui.
 
 ---
 
@@ -80,7 +100,7 @@ Explique qual é o principal objetivo do banco de dados proposto.
 
 ### Objetivo
 
-> Gerenciamento de todo salão de beleza.
+> Escreva aqui.
 
 ---
 
@@ -92,10 +112,11 @@ Liste as principais funcionalidades ou informações que deverão ser contemplad
 
 ### O banco deverá permitir:
 
-1. Registro e alteração de cliente; 
-2. Agendamento de cliente;   
-3. Registro e alteração de colaboradores;
-4. Registro e alteração de estoque.
+1. 
+2. 
+3. 
+4. 
+5. 
 
 ---
 
@@ -129,11 +150,12 @@ Pagamento
 
 | Nº | Entidade | O que representa? |
 |---:|---|---|
-| 1 |Clientes|Tabela|
-| 2 |Colaboradores|Tabela|
-| 3 |Produtos|Tabela|
-| 4 |Agendamentos|Tabela|
-| 5 |Serviços|Tabela|
+| 1 |  |  |
+| 2 |  |  |
+| 3 |  |  |
+| 4 |  |  |
+| 5 |  |  |
+| 6 |  |  |
 
 > Como referência para esta atividade, planeje **pelo menos 4 tabelas relacionadas**.
 
@@ -148,15 +170,15 @@ Para cada entidade, identifique os principais atributos que deverão ser armazen
 **Nome da entidade:**
 
 ```text
-Clientes
+
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-|CPF|IDENTIFICAÇÃO|STRING|SIM|
-|ID_CLIENTES|IDENTIFICAÇÃO|STRING|SIM|
-|TELEFONE|CONTATO|STRING|SIM|
-|NOME|IDENTIFICAÇÃO|STRING|SIM|
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 |  |  |  |  |
 
 ## Entidade 2
@@ -164,15 +186,15 @@ Clientes
 **Nome da entidade:**
 
 ```text
-Colaboradores
+
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-|CPF|IDENTIFICAÇÃO|STRING|SIM|
-|ENDEREÇO|LOCAÇÃO|STRING|SIM|
-|ID_COLABORADOR|CÓDIGO DE ACESSO|INT|SIM|
-|CHAVE_PIX|PAGAMENTOS|STRING|SIM|
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 |  |  |  |  |
 
 ## Entidade 3
@@ -180,29 +202,29 @@ Colaboradores
 **Nome da entidade:**
 
 ```text
-Produtos
+
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-|PREÇO_DE_COMPRA|VALOR|FLOAT|SIM|
-|PREÇO_DE_VENDA|VALOR|FLOAT|SIM|
-|DATA_COMPRAS|DATA DE COMPRAS|DATETIME|SIM|
-|DATA_VENDAS|DATA DE VENDAS|DATETIME|SIM|
-|ID_PRODUTO|IDENTIFICAÇÃO DO PRODUTO|STRING|SIM|
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 
 ## Entidade 4
 
 **Nome da entidade:**
 
 ```text
-Agendamentos
+
 ```
 
 | Atributo | Informação armazenada | Tipo de dado previsto | Obrigatório? |
 |---|---|---|---|
-|DATA_AGENDAMENTO|DATA DO AGENDAMENTO|DATETIME|SIM|
-||  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 |  |  |  |  |
 |  |  |  |  |
 |  |  |  |  |
@@ -213,7 +235,7 @@ Caso o projeto possua mais de quatro entidades, registre-as abaixo.
 
 | Entidade | Principais atributos |
 |---|---|
-|SERVIÇOS|ID_SERVIÇOS|
+|  |  |
 |  |  |
 |  |  |
 
@@ -225,11 +247,10 @@ Cada tabela deverá possuir uma forma de identificar unicamente seus registros.
 
 | Entidade/Tabela | Chave primária prevista | Justificativa |
 |---|---|---|
-|CLIENTE|CPF|IDENTIFICAÇÃO|
-|COLABORADOR|ID_COLABORADOR|IDENTIFICAÇÃO|
-|PRODUTOS|ID_PRODUTO|IDENTIFICAÇÃO|
-|AGENDAMENTOS|DATA_AGENDAMENTO|IDENTIFICAÇÃO|
-|SERVIÇOS|ID_SERVIÇOS|IDENTIFICAÇÃO|
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
 
 Considere:
 
@@ -256,11 +277,11 @@ Produto aparece em Item_Pedido
 
 | Entidade A | Relacionamento | Entidade B |
 |---|---|---|
-|CLIENTES|REALIZA|AGENDAMENTOS
-|CLIENTES|UTILIZA|SERVIÇOS|
-|CLIENTES|COMPRAM|PRODUTOS|
-|COLABORADORES|REGISTRAM|PRODUTOS|
-|COLABORADORES|REGISTRAM|CLIENTES|
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
 
 ---
 
@@ -276,10 +297,10 @@ N:N  → muitos para muitos
 
 | Relacionamento | Cardinalidade prevista | Justificativa |
 |---|---|---|
-|CLIENTES/PRODUTOS|1:N|CLIENTE PODE COMPRAR VÁRIOS PRODUTOS
-|CLIENTES/AGENDAMENTOS|1:N|CLIENTE PODE AGENDAR VÁRIAS VEZES
-|COLABORADORES/PRODUTOS|N:N|COLABORADOR PODE REGISTRAR VÁRIOS PRODUTOS|
-|COLABORADORES/CLIENTES|N:N|COLABORADOR PODE REGISTRAR VÁRIOS PRODUTOS|
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
 
 ---
 
@@ -287,10 +308,10 @@ N:N  → muitos para muitos
 
 | Tabela | Atributo previsto como FK | Referencia qual tabela? |
 |---|---|---|
-|AGENDAMENTOS|CPF|CLIENTES|
-|PRODUTOS|CPF|CLIENTES|
-|CLIENTES|CPF|COLABORADORES|
-||  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
 
 > As `FOREIGN KEY` serão implementadas posteriormente. Nesta Sprint, apenas planeje os relacionamentos.
 
@@ -311,12 +332,11 @@ AUTO_INCREMENT
 
 | Tabela | Atributo | Restrição prevista | Motivo |
 |---|---|---|---|
-|CLIENTES|CPF|PRIMARY KEY/UNIQUE|IDENTIFICAÇÃO|
-|COLABORADORES|ID_COLABORADOR|PRIMARY KEY/AUTO_INCREMENT/UNIQUE|IDENTIFICAÇÃO GERADA PELO SISTEMA|
-|PRODUTOS|ID_PRODUTO|PRIMARY KEY/AUTO_INCREMENT/UNIQUE|IDENTIFICAÇÃO GERADA PELO SISTEMA| 
-|AGENDAMENTOS|DATA_AGENDAMENTO|PRIMARY KEY|IDENTIFICAÇÃO|
-|SERVIÇOS|ID_SERVIÇOS|PRIMARY KEY/UNIQUE|IDENTIFICAÇÃO|
-
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 
 ---
 
@@ -336,11 +356,11 @@ Um empréstimo deve possuir uma data de realização.
 
 ### Regras do seu banco
 
-1. Um cliente não pode possuir dois cadastros com o mesmo CPF.
-2. Um produto não pode possuir preço negativo.
-3. Um pedido deve estar associado a um cliente existente.
-4. Um colaborador deve ser registrado com apenas um identificador.
-5. Um agendamento só pode ser feito para cliente existente.
+1. 
+2. 
+3. 
+4. 
+5. 
 
 ---
 
@@ -367,18 +387,8 @@ CLIENTE 1 ───── N PEDIDO
 ### Esboço do seu banco
 
 ```text
-CLIENTE
-├── id_cliente
-├── NOME
-└── CPF (PK)
-└── TELEFONE
-
-AGENDAMENTO
-├── DATA_AGENDAMENTO (PK)
-├── CPF (FK)
-└── ID_SERVIÇOS
-
-CLIENTE 1 ───── N AGENDAMENTO
+Escreva aqui a estrutura planejada.
+```
 
 ---
 
@@ -386,10 +396,10 @@ CLIENTE 1 ───── N AGENDAMENTO
 
 Descreva que tipos de registros deverão existir no banco quando ele for populado.
 
-1. CLIENTES REGISTRADOS 
-2. COLABORADORES REGISTRADOS
-3. PRODUTOS REGISTRADOS
-4. DATAS DE AGENDAMENTOS PREENCHIDAS
+1. 
+2. 
+3. 
+4. 
 
 ---
 
@@ -409,11 +419,11 @@ Quais categorias possuem mais de 5 produtos?
 
 ### Perguntas do seu projeto
 
-1. Quais clientes estão cadastrados? 
-2. Quais produtos tem maior lucro?
-3. Quais agendamentos diários?
-4. Quais produtos mais está sendo vendidos?
-5. Quantos clientes ativos tem registrados?
+1. 
+2. 
+3. 
+4. 
+5. 
 
 ---
 
@@ -431,24 +441,24 @@ Caso não existam dúvidas:
 
 # 18. Checklist da Sprint 1/5
 
-- [V] identifiquei o aluno responsável;
-- [V] defini o tema do banco de dados;
-- [V] descrevi o sistema;
-- [V] defini o objetivo do banco;
-- [V] defini o escopo inicial;
-- [V] identifiquei pelo menos 4 entidades;
-- [V] planejei os principais atributos;
-- [V] defini as chaves primárias previstas;
-- [V] identifiquei os relacionamentos;
-- [V] defini as cardinalidades iniciais;
-- [V] identifiquei possíveis chaves estrangeiras;
-- [V] planejei restrições de integridade;
-- [V] defini pelo menos 5 regras de negócio;
-- [V] fiz um esboço da estrutura do banco;
-- [V] defini os tipos de dados que futuramente serão cadastrados;
-- [V] defini pelo menos 5 perguntas que o banco deverá responder;
+- [ ] identifiquei o aluno responsável;
+- [ ] defini o tema do banco de dados;
+- [ ] descrevi o sistema;
+- [ ] defini o objetivo do banco;
+- [ ] defini o escopo inicial;
+- [ ] identifiquei pelo menos 4 entidades;
+- [ ] planejei os principais atributos;
+- [ ] defini as chaves primárias previstas;
+- [ ] identifiquei os relacionamentos;
+- [ ] defini as cardinalidades iniciais;
+- [ ] identifiquei possíveis chaves estrangeiras;
+- [ ] planejei restrições de integridade;
+- [ ] defini pelo menos 5 regras de negócio;
+- [ ] fiz um esboço da estrutura do banco;
+- [ ] defini os tipos de dados que futuramente serão cadastrados;
+- [ ] defini pelo menos 5 perguntas que o banco deverá responder;
 - [ ] registrei dúvidas ou decisões pendentes;
-- [V] revisei o arquivo antes de finalizar.
+- [ ] revisei o arquivo antes de finalizar.
 
 ---
 
