@@ -175,11 +175,11 @@ Ordem recomendada:
 
 | Tabela | Quantidade prevista | Depende de outra tabela? |
 |---|---:|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+|CLIENTES| 5 |Não|
+|SERVICOS|5|Não|
+|COLABORADORES|6|Não|
+|PRODUTOS|5|Não|
+|AGENDAMENTO|5|Sim|
 
 ---
 
@@ -190,11 +190,15 @@ Ordem recomendada:
 **Nome:**
 
 ```text
-
+CLIENTES
 ```
 
 ```sql
--- Cole aqui os INSERTs realizados.
+--     ('Lara da Silva', '13221654881', '66992445588'),
+    ('Nina Novais', '55522244477', '62982554488'),
+    ('Maia Prado', '85274196388', '65999885545'),
+    ('Sara Silveira', '14523698745', '64999885522'),
+    ('Noah Meireles', '11122233345', '6199885522');
 
 ```
 
@@ -203,11 +207,15 @@ Ordem recomendada:
 **Nome:**
 
 ```text
-
+SERVICOS
 ```
 
 ```sql
--- Cole aqui os INSERTs realizados.
+--  ('Corte Feminino', 80.00),
+    ('Manicure', 35.00),
+    ('Escova Progressiva', 200.00),
+    ('Pedicure', 40.00),
+    ('Design de Sobrancelhas', 50.00);
 
 ```
 
@@ -216,11 +224,16 @@ Ordem recomendada:
 **Nome:**
 
 ```text
-
+COLABORADORES
 ```
 
 ```sql
--- Cole aqui os INSERTs realizados.
+-- ('Elizabeth da Silva', '66992445588', 'Av ruibos'),
+    ('Michonne Novais', '62982554488', 'Rua clementina'),
+    ('Sofia Prado', '65999885545', 'Av da silva'),
+    ('Carol Silveira', '64999885522', 'Av das flores'),
+    ('Daryl Meireles', '6199885522', 'Rua do carmo,1155'),
+    ('Rick Grimes', '6199885522', 'Av Carvalho');
 
 ```
 
@@ -229,11 +242,15 @@ Ordem recomendada:
 **Nome:**
 
 ```text
-
+PRODUTOS
 ```
 
 ```sql
--- Cole aqui os INSERTs realizados.
+--  ('Shampoo Kerastase', 380.00, 450.00, '2026-10-01 10:00:00', '2026-10-02 14:30:00'),
+    ('Máscara Keune', 195.00, 280.00, '2026-10-01 10:00:00', '2026-10-03 11:15:00'),
+    ('Mascara de Reconstrucao Kerastase', 450.00, 600.00, '2026-10-05 09:00:00', '2026-10-06 16:00:00'),
+    ('Joias', 80.00, 100.00, '2026-10-10 08:00:00', '2026-10-11 12:00:00'),
+    ('Oleo Reparador', 120.00, 200.00, '2026-10-10 08:00:00', '2026-10-12 15:00:00');
 
 ```
 
@@ -327,8 +344,8 @@ Registre os resultados:
 
 | Restrição testada | O que foi testado? | Resultado |
 |---|---|---|
-|  |  |  |
-|  |  |  |
+|auto_increment|Adcionar conteúdo|Não permitido|
+|Not null|Deixar sem dados|Não foi permitido|
 |  |  |  |
 
 > Não mantenha comandos propositalmente inválidos no `SPRINT3-5.sql` final.
@@ -391,35 +408,40 @@ Execute pelo menos:
 ## UPDATE 1
 
 ```sql
--- Cole aqui.
-
+-- UPDATE CLIENTES 
+SET TELEFONE = '66999991111' 
+WHERE CPF = '13221654881';
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Número de telefone para CPF destinado
 
 ## UPDATE 2
 
 ```sql
--- Cole aqui.
+-- UPDATE SERVICOS 
+SET PRECO_SERVICOS = 90.00 
+WHERE NOME_SERVICO = 'Corte Feminino';
 
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Valor do corte de cabelo feminino
 
 ## UPDATE 3
 
 ```sql
--- Cole aqui.
+-- UPDATE COLABORADORES 
+SET ENDEREÇO = 'Rua dos Girassóis, 500' 
+WHERE ID_COLABORADOR = 1;
 
 ```
 
 **O que foi alterado?**
 
-> Escreva aqui.
+> Alterado nome da rua para colaborador destinado
 
 ---
 
@@ -498,24 +520,26 @@ Execute pelo menos:
 ## DELETE 1
 
 ```sql
--- Cole aqui.
+-- DELETE FROM CLIENTES
+WHERE ID_CLIENTES = 1;
 
 ```
 
 **Registro removido:**
 
-> Escreva aqui.
+> Deletado um registro de cliente
 
 ## DELETE 2
 
 ```sql
--- Cole aqui.
+-- DELETE FROM COLABORADORES
+WHERE ID_COLABORADOR = 1;
 
 ```
 
 **Registro removido:**
 
-> Escreva aqui.
+> Foi deletaado um registro de colaborador
 
 ---
 
@@ -722,11 +746,11 @@ SPRINT3-5.sql
 
 | Tabela | Quantidade aproximada de registros ao final |
 |---|---:|
-|  |  |
-|  |  |
-|  |  |
-|  |  |
-|  |  |
+|CLIENTES|5|
+|SERVICOS|5|
+|COLABORADORES|6|
+|PRODUTOS|5|
+|AGENDAMENTO|5|
 
 ---
 
@@ -737,7 +761,7 @@ SPRINT3-5.sql
 Quantidade aproximada de registros inseridos:
 
 ```text
-
+26
 ```
 
 ## UPDATE
@@ -745,7 +769,7 @@ Quantidade aproximada de registros inseridos:
 Quantidade de operações:
 
 ```text
-
+3
 ```
 
 ## DELETE
@@ -753,7 +777,7 @@ Quantidade de operações:
 Quantidade de operações:
 
 ```text
-
+2
 ```
 
 ---
@@ -762,7 +786,7 @@ Quantidade de operações:
 
 | Problema | Possível causa | Solução aplicada |
 |---|---|---|
-|  |  |  |
+|Duplicate entry|Executei o script de INSERT mais de uma vez |Adicionei o comando DROP TABLE IF EXISTS no início do script
 |  |  |  |
 |  |  |  |
 
@@ -797,22 +821,22 @@ Não exclua arquivos das etapas anteriores.
 
 # 27. Checklist da Sprint 3/5
 
-- [ ] utilizei o banco criado na Sprint 2/5;
-- [ ] utilizei `USE`;
-- [ ] inseri dados coerentes com o projeto;
-- [ ] respeitei a ordem das tabelas;
-- [ ] procurei inserir pelo menos 5 registros nas tabelas principais;
-- [ ] testei restrições de integridade;
-- [ ] executei pelo menos 3 `UPDATE`;
-- [ ] os `UPDATE` possuem condição adequada;
-- [ ] executei pelo menos 2 `DELETE`;
-- [ ] os `DELETE` possuem condição adequada;
-- [ ] verifiquei dependências de `FOREIGN KEY`;
-- [ ] utilizei `SELECT` para conferência;
-- [ ] registrei os problemas encontrados;
-- [ ] salvei o código como `SPRINT3-5.sql`;
-- [ ] preenchi completamente o `SPRINT3-5.md`;
-- [ ] revisei os arquivos antes do commit.
+- [x] utilizei o banco criado na Sprint 2/5;
+- [x] utilizei `USE`;
+- [x] inseri dados coerentes com o projeto;
+- [x] respeitei a ordem das tabelas;
+- [x] procurei inserir pelo menos 5 registros nas tabelas principais;
+- [x] testei restrições de integridade;
+- [x] executei pelo menos 3 `UPDATE`;
+- [x] os `UPDATE` possuem condição adequada;
+- [x] executei pelo menos 2 `DELETE`;
+- [x] os `DELETE` possuem condição adequada;
+- [x] verifiquei dependências de `FOREIGN KEY`;
+- [x] utilizei `SELECT` para conferência;
+- [x] registrei os problemas encontrados;
+- [x] salvei o código como `SPRINT3-5.sql`;
+- [x] preenchi completamente o `SPRINT3-5.md`;
+- [x] revisei os arquivos antes do commit.
 
 ---
 
