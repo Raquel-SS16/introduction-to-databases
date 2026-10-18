@@ -59,23 +59,23 @@ Não altere nem apague os arquivos do `Module-1`.
 
 **Nome completo:**
 
-> Escreva aqui.
+> Vinícius Eduardo Lima de Assis.
 
 **Branch:**
 
 ```text
-team-XX
+team-09
 ```
 
 **Nome do banco:**
 
 ```text
-
+pacote_viagens
 ```
 
 **Tema do projeto:**
 
-> Escreva aqui.
+> Sistema de Gestão e Reserva de Pacotes de Viagens.
 
 ---
 
@@ -85,11 +85,11 @@ Liste as principais tabelas que serão utilizadas.
 
 | Nº | Tabela | PK | Principais FKs |
 |---:|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | destino | id_destino | Nenhuma |
+| 2 | cliente | id_cliente | Nenhuma |
+| 3 | transporte | id_transporte | Nenhuma |
+| 4 | hospedagem | id_hospedagem | id_destino |
+| 5 | reserva_pacote | id_reserva | id_cliente, id_hospedagem, id_transporte |
 
 ---
 
@@ -97,10 +97,10 @@ Liste as principais tabelas que serão utilizadas.
 
 | Tabela A | Cardinalidade | Tabela B | FK utilizada |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| destino | 1:N | hospedagem | hospedagem.id_destino |
+| cliente | 1:N | reserva_pacote | reserva_pacote.id_cliente |
+| hospedagem | 1:N | reserva_pacote | reserva_pacote.id_hospedagem |
+| transporte | 1:N | reserva_pacote | reserva_pacote.id_transporte |
 
 ---
 
@@ -123,43 +123,57 @@ INNER JOIN tabela_b AS b
 
 **Pergunta em linguagem natural:**
 
-> Escreva aqui.
+> Quais hospedagens estão cadastradas e a quais destinos (nome e estado) elas pertencem?
 
 **Tabelas utilizadas:**
 
 ```text
-
+hospedagem, destino
 ```
 
 **PK/FK utilizadas:**
 
 ```text
-
+destino.id_destino (PK), hospedagem.id_destino (FK)
 ```
 
 **SQL:**
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    h.nome AS hospedagem,
+    h.tipo,
+    h.valor_diaria,
+    d.nome AS destino,
+    d.estado
+FROM hospedagem AS h
+INNER JOIN destino AS d
+    ON h.id_destino = d.id_destino;
 ```
 
 **Explique o resultado:**
 
-> Escreva aqui.
+> Retorna apenas as hospedagens que possuem um destino devidamente associado, relacionando as informações do hotel/pousada com a cidade/localização de destino.
 
 ## Consulta INNER JOIN 2
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais clientes realizaram reservas e qual a data e quantidade de pessoas de cada reserva?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    c.nome AS cliente,
+    r.data_reserva,
+    r.quantidade_pessoas
+FROM cliente AS c
+INNER JOIN reserva_pacote AS r
+    ON c.id_cliente = r.id_cliente;
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> Associa os dados dos clientes com as suas respectivas reservas cadastradas, omitindo clientes que ainda não efetuaram nenhuma reserva.
 
 ---
 
@@ -171,15 +185,22 @@ O `LEFT JOIN` mantém todos os registros da tabela à esquerda, mesmo quando nã
 
 **Pergunta:**
 
-> Escreva aqui.
+> Liste todos os clientes e suas respectivas reservas (caso existam).
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    c.nome AS cliente,
+    c.email,
+    r.id_reserva,
+    r.data_reserva
+FROM cliente AS c
+LEFT JOIN reserva_pacote AS r
+    ON c.id_cliente = r.id_cliente;
 ```
 
 **O que o LEFT JOIN permite visualizar neste caso?**
 
-> Escreva aqui.
+> Permite visualizar todos os clientes cadastrados no sistema, inclusive aqueles que não possuem nenhuma reserva efetuada (exibindo valores NULL nas colunas da reserva).
 
 ---
 
@@ -191,15 +212,22 @@ O `RIGHT JOIN` mantém todos os registros da tabela da direita, mesmo quando nã
 
 **Pergunta:**
 
-> Escreva aqui.
+> Liste todas as hospedagens e as reservas associadas a elas.
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    r.id_reserva,
+    r.data_reserva,
+    h.nome AS hospedagem,
+    h.valor_diaria
+FROM reserva_pacote AS r
+RIGHT JOIN hospedagem AS h
+    ON r.id_hospedagem = h.id_hospedagem;
 ```
 
 **Explique o resultado:**
 
-> Escreva aqui.
+> Retorna todas as hospedagens da tabela à direita (hospedagem), mesmo aquelas que ainda não receberam nenhuma reserva, garantindo a visualização de todos os hotéis/pousadas do catálogo.
 
 ---
 
@@ -211,20 +239,38 @@ Crie duas consultas envolvendo pelo menos três tabelas.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais clientes reservaram hospedagens e qual o destino dessas hospedagens?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    c.nome AS cliente,
+    h.nome AS hospedagem,
+    d.nome AS destino,
+    d.pais
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN destino AS d ON h.id_destino = d.id_destino;
 ```
 
 ## Consulta 2
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual o detalhamento completo de cada reserva, incluindo cliente, hospedagem e transporte utilizado?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    r.id_reserva,
+    c.nome AS cliente,
+    h.nome AS hospedagem,
+    t.empresa AS empresa_transporte,
+    t.tipo AS tipo_transporte,
+    r.data_reserva
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN transporte AS t ON r.id_transporte = t.id_transporte;
 ```
 
 ---
@@ -233,15 +279,22 @@ Crie duas consultas envolvendo pelo menos três tabelas.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais clientes reservaram hospedagens com diária superior a R$ 1.000,00?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    c.nome AS cliente,
+    h.nome AS hospedagem,
+    h.valor_diaria
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+WHERE h.valor_diaria > 1000.00;
 ```
 
 **Explique o filtro:**
 
-> Escreva aqui.
+> O filtro WHERE h.valor_diaria > 1000.00 restringe o resultado da junção apenas para as reservas em que a diária da hospedagem selecionada ultrapassa R$ 1.000,00.
 
 ---
 
@@ -249,10 +302,16 @@ Crie duas consultas envolvendo pelo menos três tabelas.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais são os destinos e suas respectivas hospedagens, ordenadas da diária mais cara para a mais barata?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    d.nome AS destino,
+    h.nome AS hospedagem,
+    h.valor_diaria
+FROM hospedagem AS h
+INNER JOIN destino AS d ON h.id_destino = d.id_destino
+ORDER BY h.valor_diaria DESC;
 ```
 
 ---
@@ -263,15 +322,21 @@ Crie uma consulta que combine tabelas e utilize ao menos uma função de agrega�
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual o total de pessoas reservadas por nome de destino?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    d.nome AS destino,
+    SUM(r.quantidade_pessoas) AS total_pessoas
+FROM reserva_pacote AS r
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN destino AS d ON h.id_destino = d.id_destino
+GROUP BY d.nome;
 ```
 
 **Explique o agrupamento:**
 
-> Escreva aqui.
+> A consulta agrupa os registros pelo nome do destino e calcula a soma total de viajantes (SUM(r.quantidade_pessoas)) que fizeram reservas para hospedagens situados em cada um desses destinos.
 
 ---
 
@@ -297,16 +362,27 @@ As consultas devem responder perguntas reais sobre o banco.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual é o resumo executivo de todas as reservas ativas, apresentando o cliente, hospedagem, transporte, número de passageiros e data?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    r.id_reserva,
+    c.nome AS cliente,
+    h.nome AS hospedagem,
+    t.tipo AS modal,
+    t.empresa AS transporte,
+    r.quantidade_pessoas,
+    r.data_reserva
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN transporte AS t ON r.id_transporte = t.id_transporte
+ORDER BY r.data_reserva ASC;
 ```
 
 **Por que ela é útil?**
 
-> Escreva aqui.
-
+> É a consulta operacional mais completa para a agência de viagens, pois consolida em uma única visão todas as pontas do pacote vendido (cliente, estadia e transporte), facilitando a emissão de relatórios e vouchers.
 ---
 
 # 14. Validação prática obrigatória
@@ -314,7 +390,15 @@ As consultas devem responder perguntas reais sobre o banco.
 Escolha uma consulta produzida nesta Sprint.
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    h.nome AS hospedagem,
+    h.tipo,
+    h.valor_diaria,
+    d.nome AS destino,
+    d.estado
+FROM hospedagem AS h
+INNER JOIN destino AS d
+    ON h.id_destino = d.id_destino;
 ```
 
 Explique:
@@ -325,7 +409,7 @@ Explique:
 4. o que a cláusula `ON` faz;
 5. o que ocorreria se a condição de relacionamento estivesse errada.
 
-> Escreva aqui.
+> 1. Participam as tabelas hospedagem (com o alias h) e destino (com o alias d); 2. A Chave Primária utilizada é id_destino da tabela destino (d.id_destino); 3. A Chave Estrangeira utilizada é id_destino da tabela hospedagem (h.id_destino), que faz referência à PK da tabela destino; 4. A cláusula ON (h.id_destino = d.id_destino) estabelece a condição de junção relacional. Ela garante que cada registro de hospedagem seja combinado estritamente com o registro correspondente da tabela de destinos; 5. Se a condição estivesse errada (ou ausente), ocorreria um produto cartesiano (onde todas as hospedagens seriam associadas a todos os destinos cadastrados), gerando combinações falsas/incoerentes de dados no resultado da consulta.
 
 ---
 
@@ -334,16 +418,23 @@ Explique:
 **Consulta executada:**
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    c.nome AS cliente,
+    h.nome AS hospedagem,
+    d.nome AS destino
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN destino AS d ON h.id_destino = d.id_destino;
 ```
 
 **Resultado esperado:**
 
-> Escreva aqui.
+> A lista exibindo o nome dos clientes, as hospedagens reservados e o nome do destino correspondente para cada reserva existente.
 
 **Resultado obtido:**
 
-> Escreva aqui.
+> Retornou com sucesso os registros de reservas ativas vinculando corretamente clientes como 'Carlos Silva' e 'Mariana Oliveira' às suas respectivas estadias e destinos sem erros de sintaxe ou inconsistência de chave.
 
 ---
 
@@ -351,7 +442,7 @@ Explique:
 
 | Problema | Causa | Solução |
 |---|---|---|
-|  |  |  |
+| Ambiguidade no nome de colunas (ex: nome) | A coluna nome existe em várias tabelas (cliente, destino, hospedagem) | Utilização de alias explícitos (h.nome AS hospedagem, d.nome AS destino) |
 |  |  |  |
 |  |  |  |
 
@@ -407,20 +498,20 @@ USE nome_do_banco;
 
 # 19. Checklist
 
-- [ ] utilizei o mesmo banco do Module-1;
-- [ ] identifiquei PKs e FKs;
-- [ ] produzi 2 `INNER JOIN`;
-- [ ] produzi 1 `LEFT JOIN`;
-- [ ] produzi 1 `RIGHT JOIN`;
-- [ ] produzi consultas com 3 ou mais tabelas;
-- [ ] utilizei `WHERE`;
-- [ ] utilizei `ORDER BY`;
-- [ ] utilizei agregação e `GROUP BY`;
-- [ ] as consultas respondem perguntas reais;
-- [ ] testei tudo no MySQL Workbench;
-- [ ] consigo explicar as consultas;
-- [ ] salvei `SPRINT1-5.md`;
-- [ ] salvei `SPRINT1-5.sql`.
+- [x] utilizei o mesmo banco do Module-1;
+- [x] identifiquei PKs e FKs;
+- [x] produzi 2 `INNER JOIN`;
+- [x] produzi 1 `LEFT JOIN`;
+- [x] produzi 1 `RIGHT JOIN`;
+- [x] produzi consultas com 3 ou mais tabelas;
+- [x] utilizei `WHERE`;
+- [x] utilizei `ORDER BY`;
+- [x] utilizei agregação e `GROUP BY`;
+- [x] as consultas respondem perguntas reais;
+- [x] testei tudo no MySQL Workbench;
+- [x] consigo explicar as consultas;
+- [x] salvei `SPRINT1-5.md`;
+- [x] salvei `SPRINT1-5.sql`.
 
 ---
 
