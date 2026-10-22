@@ -1,7 +1,7 @@
 -- ============================================================
 -- IDENTIFICACAO
 -- ============================================================
--- Aluno: Rafael Tokashiki Souza
+-- Aluno: Rafael  Tokashiki Souza
 -- Instituicao: UFR
 -- Disciplina: Laboratorio de Banco de Dados
 -- Sprint: 5/5 - Script integrado e validacao final
