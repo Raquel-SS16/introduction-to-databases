@@ -1451,9 +1451,10 @@ Responda brevemente.
 
 ## Se tivesse mais tempo, o que melhoraria?
 
-> Implementaria tabelas adicionais para controle de marcas oficiais em competições de atletismo, histórico de treinamentos e frequência dos atletas.
+> Implementaria tabelas adicionais para controle de marcas oficiais em competições de atletismo, histórico de treinamentos e frequência dos atletas. 
 
 ---
+
 
 # 44. Critério de conclusão da Sprint 5/5
 
