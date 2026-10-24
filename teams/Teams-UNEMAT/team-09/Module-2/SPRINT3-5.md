@@ -29,12 +29,12 @@ O aluno deverá compreender que uma `VIEW` representa uma consulta armazenada qu
 
 **Nome completo:**
 
-> Escreva aqui.
+> Vinícius Eduardo Lima de Assis.
 
 **Banco utilizado:**
 
 ```text
-
+pacote_viagens
 ```
 
 ---
@@ -45,10 +45,9 @@ Identifique pelo menos três consultas das Sprints anteriores que são important
 
 | Consulta | Por que é útil? | Será transformada em VIEW? |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Junção de reservas com clientes, hospedagens e transportes | Permite visualizar todas as informações operacionais das reservas em um único local | Sim |
+| Total gasto e quantidade de pessoas por destino | Facilita a análise de faturamento e fluxo de turistas por localização | Sim |
+| Média de diárias por tipo de hospedagem | Permite comparar a média de preços entre hotéis, pousadas e hotéis de luxo | Sim |
 
 ---
 
@@ -84,27 +83,40 @@ INNER JOIN pedido AS p
 **Nome da VIEW:**
 
 ```text
-
+vw_detalhes_reservas
 ```
 
 **Pergunta que ela representa:**
 
-> Escreva aqui.
+> Quais são os detalhes completos de cada reserva efetuada, incluindo nome do cliente, e-mail, hospedagem reservada e empresa de transporte utilizada?
 
 **SQL:**
 
 ```sql
--- Cole aqui.
+-- CREATE VIEW vw_detalhes_reservas AS
+SELECT 
+    r.id_reserva,
+    c.nome AS nome_cliente,
+    c.email AS email_cliente,
+    h.nome AS nome_hospedagem,
+    t.empresa AS empresa_transporte,
+    t.tipo AS tipo_transporte,
+    r.data_reserva,
+    r.quantidade_pessoas
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN transporte AS t ON r.id_transporte = t.id_transporte;
 ```
 
 **Tabelas utilizadas:**
 
-> Escreva aqui.
+> reserva_pacote, cliente, hospedagem e transporte.
 
 **Como consultar essa VIEW?**
 
 ```sql
--- Cole aqui.
+-- SELECT * FROM vw_detalhes_reservas;
 ```
 
 ---
@@ -119,15 +131,24 @@ Esta VIEW deverá possuir, quando aplicável:
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual é a quantidade total de pessoas com reserva e a quantidade total de reservas efetuadas agrupadas por destino?
 
 ```sql
--- Cole aqui.
+-- CREATE VIEW vw_resumo_por_destino AS
+SELECT 
+    d.nome AS destino,
+    d.pais,
+    COUNT(r.id_reserva) AS total_reservas,
+    SUM(r.quantidade_pessoas) AS total_passageiros
+FROM destino AS d
+INNER JOIN hospedagem AS h ON d.id_destino = h.id_destino
+INNER JOIN reserva_pacote AS r ON h.id_hospedagem = r.id_hospedagem
+GROUP BY d.id_destino, d.nome, d.pais;
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> A VIEW combina quatro tabelas, agrupa os dados pelo destino do pacote de viagens e calcula agregados: o número total de reservas (COUNT) e o número total acumulado de viajantes (SUM).
 
 ---
 
@@ -150,16 +171,27 @@ pagamentos pendentes
 **Nome da VIEW:**
 
 ```text
-
+vw_reservas_ativas
 ```
 
 ```sql
--- Cole aqui.
+-- CREATE VIEW vw_reservas_ativas AS
+SELECT 
+    r.id_reserva,
+    c.nome AS cliente,
+    c.telefone,
+    h.nome AS hospedagem,
+    r.data_reserva,
+    r.quantidade_pessoas
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+WHERE c.ativo = TRUE;
 ```
 
 **Por que essa VIEW é útil?**
 
-> Escreva aqui.
+> É extremamente útil para o setor operacional da agência de viagens no dia a dia, pois traz uma lista limpa das reservas ligadas a clientes ativos no cadastro, facilitando o contato direto e o envio de confirmações de viagem.
 
 ---
 
@@ -183,12 +215,18 @@ WHERE ...;
 **SQL executado:**
 
 ```sql
--- Cole aqui.
+-- Consulta simples na VIEW
+SELECT * FROM vw_detalhes_reservas;
+
+-- Consulta com filtro na VIEW
+SELECT * 
+FROM vw_detalhes_reservas 
+WHERE quantidade_pessoas > 2;
 ```
 
 **Resultado observado:**
 
-> Escreva aqui.
+> A primeira consulta retornou todas as reservas cadastradas com suas informações resumidas e nomes completos. A segunda consulta filtrou com sucesso apenas as reservas que continham mais de 2 passageiros, demonstrando que a VIEW aceita filtros da mesma forma que uma tabela comum.
 
 ---
 
@@ -207,18 +245,43 @@ Pode ser:
 **VIEW original:**
 
 ```sql
--- Cole aqui.
+-- CREATE VIEW vw_reservas_ativas AS
+SELECT 
+    r.id_reserva,
+    c.nome AS cliente,
+    c.telefone,
+    h.nome AS hospedagem,
+    r.data_reserva,
+    r.quantidade_pessoas
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+WHERE c.ativo = TRUE;
 ```
 
 **Nova versão:**
 
 ```sql
-CREATE OR REPLACE VIEW ...
+CREATE OR REPLACE VIEW vw_reservas_ativas AS
+SELECT 
+    r.id_reserva,
+    c.nome AS cliente,
+    c.telefone,
+    c.email,
+    h.nome AS hospedagem,
+    d.nome AS destino,
+    r.data_reserva,
+    r.quantidade_pessoas
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN destino AS d ON h.id_destino = d.id_destino
+WHERE c.ativo = TRUE;
 ```
 
 **O que mudou?**
 
-> Escreva aqui.
+> Foi adicionado um INNER JOIN com a tabela destino e incluídas as colunas c.email e d.nome AS destino, enriquecendo a VIEW com as informações do e-mail do cliente e a cidade do destino reservado.
 
 ---
 
@@ -240,12 +303,17 @@ DROP VIEW vw_teste;
 **Código utilizado:**
 
 ```sql
--- Cole aqui.
+-- Criação de VIEW temporária
+CREATE VIEW vw_teste AS
+SELECT id_cliente, nome FROM cliente;
+
+-- Remoção da VIEW temporária
+DROP VIEW vw_teste;
 ```
 
 **Qual a diferença entre `DROP VIEW` e `DROP TABLE`?**
 
-> Escreva aqui.
+> O comando DROP VIEW exclui apenas o objeto virtual de consulta e suas definições do banco de dados, sem remover nenhum dado real. Já o comando DROP TABLE elimina a estrutura física e todos os dados armazenados de forma irreversível da tabela do banco.
 
 ---
 
@@ -260,9 +328,9 @@ WHERE Table_type = 'VIEW';
 
 **Views encontradas:**
 
-1. 
-2. 
-3. 
+1. vw_detalhes_reservas
+2. vw_reservas_ativas
+3. vw_resumo_por_destino
 
 ---
 
@@ -277,18 +345,20 @@ Faça um teste:
 **VIEW testada:**
 
 ```text
-
+vw_detalhes_reservas
 ```
 
 **Alteração realizada:**
 
 ```sql
--- Cole aqui.
+-- UPDATE cliente 
+SET nome = 'Carlos Silva Marques' 
+WHERE id_cliente = 1;
 ```
 
 **Resultado observado:**
 
-> Escreva aqui.
+> Ao consultar a vw_detalhes_reservas novamente após o UPDATE, o nome do cliente 1 apareceu automaticamente alterado para "Carlos Silva Marques". Isso confirma que as VIEWs não armazenam dados estáticos, mas consultam a tabela base em tempo real.
 
 ---
 
@@ -297,7 +367,20 @@ Faça um teste:
 Escolha uma VIEW.
 
 ```sql
--- Cole aqui a definição.
+-- CREATE VIEW vw_detalhes_reservas AS
+SELECT 
+    r.id_reserva,
+    c.nome AS nome_cliente,
+    c.email AS email_cliente,
+    h.nome AS nome_hospedagem,
+    t.empresa AS empresa_transporte,
+    t.tipo AS tipo_transporte,
+    r.data_reserva,
+    r.quantidade_pessoas
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN transporte AS t ON r.id_transporte = t.id_transporte;
 ```
 
 Explique:
@@ -308,7 +391,11 @@ Explique:
 4. qual problema resolve;
 5. o que muda se os dados das tabelas originais forem alterados.
 
-> Escreva aqui.
+> 1.Depende das tabelas reserva_pacote, cliente, hospedagem e transporte;
+> 2.Utiliza relacionamentos N:1 entre a tabela associativa de reservas (reserva_pacote) e as tabelas cadastrais via chaves estrangeiras id_cliente, id_hospedagem e id_transporte;
+> 3.Apresenta id_reserva, nome_cliente, email_cliente, nome_hospedagem, empresa_transporte, tipo_transporte, data_reserva e quantidade_pessoas;
+> 4.Resolve a necessidade de escrever queries extensas com múltiplos JOINs toda vez que a equipe precisar consultar os detalhes principais das reservas do sistema;
+> 5.Como a VIEW é uma tabela virtual dinâmica, qualquer inclusão, atualização ou exclusão feita nas tabelas originais será refletida de forma imediata ao consultar a VIEW.
 
 ---
 
@@ -360,9 +447,8 @@ USE nome_do_banco;
 
 | Problema | Causa | Solução |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Nome de coluna duplicado na VIEW | Seleção de colunas com o mesmo nome (ex: nome) de tabelas distintas | Utilização de apelidos/alias para as colunas no SELECT (ex: c.nome AS nome_cliente |
+| Erro ao recriar VIEW existente | Execução do comando CREATE VIEW para um nome já registrado no banco | Utilização da cláusula CREATE OR REPLACE VIEW |
 
 ---
 
@@ -384,18 +470,18 @@ COMPREENDER
 
 # 17. Checklist
 
-- [ ] utilizei o banco do projeto;
-- [ ] criei pelo menos 3 Views;
-- [ ] pelo menos uma View usa JOIN;
-- [ ] pelo menos uma View usa agregação ou resumo;
-- [ ] consultei as Views;
-- [ ] utilizei `CREATE OR REPLACE VIEW`;
-- [ ] pratiquei `DROP VIEW`;
-- [ ] validei as Views;
-- [ ] testei mudança em tabela base;
-- [ ] compreendo de onde vêm os dados de cada View;
-- [ ] salvei `SPRINT3-5.md`;
-- [ ] salvei `SPRINT3-5.sql`.
+- [x] utilizei o banco do projeto;
+- [x] criei pelo menos 3 Views;
+- [x] pelo menos uma View usa JOIN;
+- [x] pelo menos uma View usa agregação ou resumo;
+- [x] consultei as Views;
+- [x] utilizei `CREATE OR REPLACE VIEW`;
+- [x] pratiquei `DROP VIEW`;
+- [x] validei as Views;
+- [x] testei mudança em tabela base;
+- [x] compreendo de onde vêm os dados de cada View;
+- [x] salvei `SPRINT3-5.md`;
+- [x] salvei `SPRINT3-5.sql`.
 
 ---
 
