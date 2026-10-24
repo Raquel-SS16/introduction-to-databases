@@ -2,7 +2,7 @@
 
 **Disciplina:** Laboratório de Banco de Dados  
 **Módulo:** 2  
-**Modalidade:** Atividade individual  
+**Modalidade:** Atividade individual
 **Entrega desta Sprint:** `SPRINT3-5.md` + `SPRINT3-5.sql`
 
 ---
