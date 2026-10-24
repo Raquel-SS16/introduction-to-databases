@@ -36,12 +36,12 @@ O aluno deverá continuar utilizando o mesmo banco do `Module-1`.
 
 **Nome completo:**
 
-> Escreva aqui.
+> Vinícius Eduardo Lima de Assis.
 
 **Banco utilizado:**
 
 ```text
-
+pacote_viagens
 ```
 
 ---
@@ -72,11 +72,11 @@ Neste exemplo:
 
 Defina pelo menos cinco perguntas do seu domínio que possam ser resolvidas com subconsultas.
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. Quais hospedagens possuem diária acima da média de todas as hospedagens cadastradas?
+2. Quais clientes já realizaram ao menos uma reserva no sistema?
+3. Quais clientes ainda não realizaram nenhuma reserva de pacote?
+4. Quais destinos possuem hospedagens vinculadas a eles?
+5. Qual é a hospedagem com a diária mais cara do sistema?
 
 ---
 
@@ -86,19 +86,27 @@ Crie uma consulta utilizando uma comparação com resultado agregado.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais hospedagens possuem o valor da diária superior à média geral de diárias de todas as hospedagens do sistema?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    nome,
+    tipo,
+    valor_diaria
+FROM hospedagem
+WHERE valor_diaria > (
+    SELECT AVG(valor_diaria)
+    FROM hospedagem
+);
 ```
 
 **Explique primeiro a consulta interna:**
 
-> Escreva aqui.
+> A subconsulta (SELECT AVG(valor_diaria) FROM hospedagem) calcula a média aritmética de todas as diárias cadastradas na tabela hospedagem.
 
 **Depois explique a consulta externa:**
 
-> Escreva aqui.
+> A consulta externa seleciona o nome, o tipo e o valor da diária das hospedagens cujo valor_diaria seja estritamente maior do que o valor médio calculado pela subconsulta.
 
 ---
 
@@ -119,15 +127,23 @@ WHERE id_cliente IN (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais clientes possuem pelo menos uma reserva efetuada?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    id_cliente,
+    nome,
+    email
+FROM cliente
+WHERE id_cliente IN (
+    SELECT id_cliente
+    FROM reserva_pacote
+);
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> A subconsulta gera uma lista contendo todos os id_cliente presentes na tabela reserva_pacote. A consulta externa filtra e retorna apenas os clientes cujo ID esteja contido (IN) nessa lista.
 
 ---
 
@@ -135,15 +151,23 @@ WHERE id_cliente IN (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais clientes cadastrados ainda não efetuaram nenhuma reserva no sistema?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    id_cliente,
+    nome,
+    email
+FROM cliente
+WHERE id_cliente NOT IN (
+    SELECT DISTINCT id_cliente
+    FROM reserva_pacote
+);
 ```
 
 **Que registros você está procurando?**
 
-> Escreva aqui.
+> Registros da tabela cliente que não possuem nenhuma referência correspondente na tabela de reservas (reserva_pacote), permitindo identificar clientes inativos em termos de compras.
 
 ---
 
@@ -155,10 +179,19 @@ WHERE id_cliente IN (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais destinos possuem pelo menos uma hospedagem vinculada a eles?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    d.id_destino,
+    d.nome AS destino,
+    d.pais
+FROM destino AS d
+WHERE EXISTS (
+    SELECT 1
+    FROM hospedagem AS h
+    WHERE h.id_destino = d.id_destino
+);
 ```
 
 ---
@@ -167,15 +200,24 @@ WHERE id_cliente IN (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais destinos cadastrados ainda não possuem nenhuma hospedagem vinculada?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    d.id_destino,
+    d.nome AS destino,
+    d.pais
+FROM destino AS d
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM hospedagem AS h
+    WHERE h.id_destino = d.id_destino
+);
 ```
 
 **Explique a diferença em relação a `EXISTS`:**
 
-> Escreva aqui.
+> Enquanto o EXISTS verifica a presença de pelo menos uma linha correspondente na subconsulta e retorna o registro caso encontre, o NOT EXISTS inverte a lógica: só retorna o registro da consulta externa se a subconsulta retornar um conjunto vazio de linhas.
 
 ---
 
@@ -183,16 +225,23 @@ WHERE id_cliente IN (
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual hospedagem possuem o maior valor de diária do sistema?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    nome,
+    tipo,
+    valor_diaria
+FROM hospedagem
+WHERE valor_diaria = (
+    SELECT MAX(valor_diaria)
+    FROM hospedagem
+);
 ```
 
 **Explique:**
 
-> Escreva aqui.
-
+> A subconsulta obtém o valor máximo (MAX) armazenado na coluna valor_diaria. A consulta externa seleciona as hospedagens que possuem exatamente esse valor máximo.
 ---
 
 # 10. Subconsulta correlacionada
@@ -203,15 +252,24 @@ Uma subconsulta correlacionada depende de valores da consulta externa.
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais hospedagens possuem valor de diária acima da média de diárias do seu próprio tipo/categoria?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    h1.nome,
+    h1.tipo,
+    h1.valor_diaria
+FROM hospedagem AS h1
+WHERE h1.valor_diaria > (
+    SELECT AVG(h2.valor_diaria)
+    FROM hospedagem AS h2
+    WHERE h2.tipo = h1.tipo
+);
 ```
 
 **Qual coluna da consulta externa é utilizada pela subconsulta?**
 
-> Escreva aqui.
+> A coluna h1.tipo da tabela na consulta externa é referenciada na cláusula WHERE h2.tipo = h1.tipo dentro da subconsulta.
 
 ---
 
@@ -226,45 +284,73 @@ b) SUBQUERY
 
 ## Pergunta 1
 
-> Escreva aqui.
+> Quais clientes possuem reservas ativas cadastradas?
 
 ### JOIN
 
 ```sql
--- Cole aqui.
+-- SELECT DISTINCT
+    c.id_cliente,
+    c.nome,
+    c.email
+FROM cliente AS c
+INNER JOIN reserva_pacote AS r ON c.id_cliente = r.id_cliente;
 ```
 
 ### SUBQUERY
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    c.id_cliente,
+    c.nome,
+    c.email
+FROM cliente AS c
+WHERE c.id_cliente IN (
+    SELECT r.id_cliente 
+    FROM reserva_pacote AS r
+);
 ```
 
 ### Qual abordagem ficou mais compreensível?
 
-> Escreva aqui e justifique.
-
+> A abordagem por SUBQUERY com IN ficou mais compreensível. Ela expressa a intenção do negócio de forma direta ("selecione os clientes onde o ID esteja na lista de reservas") e elimina a necessidade de tratar duplicatas com a cláusula DISTINCT, que é necessária na abordagem com JOIN.
 ---
 
 ## Pergunta 2
 
-> Escreva aqui.
+> Quais são os nomes dos destinos onde há reservas efetuadas?
 
 ### JOIN
 
 ```sql
--- Cole aqui.
+-- SELECT DISTINCT
+    d.nome AS destino,
+    d.pais
+FROM destino AS d
+INNER JOIN hospedagem AS h ON d.id_destino = h.id_destino
+INNER JOIN reserva_pacote AS r ON h.id_hospedagem = r.id_hospedagem;
 ```
 
 ### SUBQUERY
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    d.nome AS destino,
+    d.pais
+FROM destino AS d
+WHERE d.id_destino IN (
+    SELECT h.id_destino
+    FROM hospedagem AS h
+    WHERE h.id_hospedagem IN (
+        SELECT r.id_hospedagem
+        FROM reserva_pacote AS r
+    )
+);
 ```
 
 ### Comparação
 
-> Escreva aqui.
+> Neste caso, a abordagem com JOIN é nitidamente mais limpa e de fácil leitura do que a subconsulta aninhada em múltiplos níveis. O JOIN permite conectar as entidades em uma sequência direta de relacionamentos relacional (destino -> hospedagem -> reserva_pacote).
 
 ---
 
@@ -290,7 +376,15 @@ O `SPRINT2-5.sql` deverá conter no mínimo:
 Escolha uma subconsulta.
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    nome,
+    tipo,
+    valor_diaria
+FROM hospedagem
+WHERE valor_diaria > (
+    SELECT AVG(valor_diaria)
+    FROM hospedagem
+);
 ```
 
 Responda:
@@ -299,7 +393,9 @@ Responda:
 2. Qual valor ou conjunto de valores ela retorna?
 3. Como esse resultado é utilizado pela consulta externa?
 
-> Escreva aqui.
+> 1)A subconsulta interna (SELECT AVG(valor_diaria) FROM hospedagem);
+> 2)Ela retorna um único valor escalar com a média de todas as diárias (exemplo: 1320.00);
+> 3)O valor retornado é comparado pela consulta externa usando o operador >, filtrando apenas as linhas da tabela hospedagem cuja coluna valor_diaria possua valor numérico superior ao resultado retornado.
 
 ---
 
@@ -310,16 +406,24 @@ Execute uma consulta e altere temporariamente um valor de filtro.
 **Consulta original:**
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    nome,
+    tipo,
+    valor_diaria
+FROM hospedagem
+WHERE valor_diaria > (
+    SELECT AVG(valor_diaria)
+    FROM hospedagem
+);
 ```
 
 **Alteração realizada:**
 
-> Escreva aqui.
+> Substituição do operador de comparação > por < para consultar as diárias abaixo da média.
 
 **Mudança observada:**
 
-> Escreva aqui.
+> A consulta passou a retornar as hospedagens de menor valor do catálogo (ex: 'Fera Palace Hotel' e 'Hotel Colline de France'), invertendo o conjunto de resultados originalmente obtido.
 
 ---
 
@@ -371,20 +475,20 @@ USE nome_do_banco;
 
 # 17. Checklist
 
-- [ ] utilizei o banco do projeto;
-- [ ] criei subconsulta com comparação;
-- [ ] utilizei `IN`;
-- [ ] utilizei `NOT IN`;
-- [ ] utilizei `EXISTS`;
-- [ ] utilizei `NOT EXISTS`;
-- [ ] utilizei `MAX` ou `MIN`;
-- [ ] criei subconsulta correlacionada;
-- [ ] resolvi duas perguntas usando JOIN e SUBQUERY;
-- [ ] expliquei o raciocínio;
-- [ ] testei no MySQL Workbench;
-- [ ] consigo explicar as consultas presencialmente;
-- [ ] salvei `SPRINT2-5.md`;
-- [ ] salvei `SPRINT2-5.sql`.
+- [x] utilizei o banco do projeto;
+- [x] criei subconsulta com comparação;
+- [x] utilizei `IN`;
+- [x] utilizei `NOT IN`;
+- [x] utilizei `EXISTS`;
+- [x] utilizei `NOT EXISTS`;
+- [x] utilizei `MAX` ou `MIN`;
+- [x] criei subconsulta correlacionada;
+- [x] resolvi duas perguntas usando JOIN e SUBQUERY;
+- [x] expliquei o raciocínio;
+- [x] testei no MySQL Workbench;
+- [x] consigo explicar as consultas presencialmente;
+- [x] salvei `SPRINT2-5.md`;
+- [x] salvei `SPRINT2-5.sql`.
 
 ---
 
