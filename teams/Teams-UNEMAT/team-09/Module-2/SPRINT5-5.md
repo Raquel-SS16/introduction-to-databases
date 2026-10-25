@@ -38,12 +38,12 @@ ROLLBACK
 
 **Nome completo:**
 
-> Escreva aqui.
+> Vinícius Eduardo Lima de Assis.
 
 **Banco utilizado:**
 
 ```text
-
+pacote_viagens
 ```
 
 ---
@@ -52,11 +52,11 @@ ROLLBACK
 
 | Sprint | Conteúdo | Concluído? |
 |---|---|---|
-| 1/5 | JOINs |  |
-| 2/5 | Subconsultas |  |
-| 3/5 | Views |  |
-| 4/5 | Procedures e Functions |  |
-| 5/5 | Triggers e Transações |  |
+| 1/5 | JOINs | Sim |
+| 2/5 | Subconsultas | Sim |
+| 3/5 | Views | Sim |
+| 4/5 | Procedures e Functions | Sim |
+| 5/5 | Triggers e Transações | Sim |
 
 ---
 
@@ -77,20 +77,20 @@ registrar data de modificação
 
 **Regra escolhida:**
 
-> Escreva aqui.
+> Validar o valor da diária antes da inserção ou atualização na tabela hospedagem. Caso o valor informado seja menor ou igual a zero, a operação é interrompida lançando um erro customizado (SIGNAL SQLSTATE).
 
 **Evento:**
 
-- [ ] BEFORE INSERT
+- [x] BEFORE INSERT
 - [ ] AFTER INSERT
-- [ ] BEFORE UPDATE
+- [x] BEFORE UPDATE
 - [ ] AFTER UPDATE
 - [ ] Outro
 
 **Tabela envolvida:**
 
 ```text
-
+hospedagem
 ```
 
 ---
@@ -115,12 +115,28 @@ DELIMITER ;
 **SQL do seu Trigger:**
 
 ```sql
--- Cole aqui.
+-- USE pacote_viagens;
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS trg_validar_valor_diaria_bi //
+
+CREATE TRIGGER trg_validar_valor_diaria_bi
+BEFORE INSERT ON hospedagem
+FOR EACH ROW
+BEGIN
+    IF NEW.valor_diaria <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erro: O valor da diária deve ser maior que zero.';
+    END IF;
+END //
+
+DELIMITER ;
 ```
 
 **Explique linha por linha:**
 
-> Escreva aqui.
+> "USE pacote_viagens;": Define o banco de dados ativo."DELIMITER //": Altera o delimitador padrão para // a fim de permitir múltiplos comandos no bloco. "DROP TRIGGER IF EXISTS trg_validar_valor_diaria_bi //": Remove o trigger anterior se já existir."CREATE TRIGGER trg_validar_valor_diaria_bi": Define a criação do trigger nomeado."BEFORE INSERT ON hospedagem": Especifica que a execução ocorrerá antes de disparar a gravação na tabela hospedagem."FOR EACH ROW": Executa o bloco para cada nova linha que estiver sendo inserida."BEGIN ... END": Delimita o bloco lógico de instruções."IF NEW.valor_diaria <= 0 THEN": Checa se a nova diária informada (NEW.valor_diaria) é menor ou igual a zero."SIGNAL SQLSTATE '45000' ...": Interrompe a execução lançando uma exceção de erro personalizada."DELIMITER ;": Restaura o delimitador padrão do MySQL para ;.
 
 ---
 
@@ -129,24 +145,25 @@ DELIMITER ;
 **Estado antes do teste:**
 
 ```sql
--- SELECT utilizado.
+-- SELECT COUNT(*) FROM hospedagem;
 ```
 
 **Operação executada:**
 
 ```sql
--- INSERT ou UPDATE utilizado.
+-- INSERT INTO hospedagem (nome, endereco, tipo, valor_diaria, id_destino)
+VALUES ('Pousada Inválida', 'Rua Teste, 100', 'Pousada', 0.00, 1);
 ```
 
 **Estado depois do teste:**
 
 ```sql
--- SELECT utilizado.
+-- SELECT COUNT(*) FROM hospedagem;
 ```
 
 **Resultado observado:**
 
-> Escreva aqui.
+> O MySQL bloqueou com sucesso a inserção e exibiu a mensagem de erro customizada: Error Code: 1644. Erro: O valor da diária deve ser maior que zero. A contagem de linhas permaneceu inalterada.
 
 ---
 
@@ -173,7 +190,7 @@ Crie uma transação coerente com o domínio.
 
 **Objetivo:**
 
-> Escreva aqui.
+> Cadastrar um novo cliente e registrar imediatamente uma nova reserva para ele em um único bloco.
 
 ```sql
 START TRANSACTION;
@@ -182,10 +199,27 @@ START TRANSACTION;
 
 COMMIT;
 ```
+**Operação executada:**
+
+```sql
+USE pacote_viagens;
+
+START TRANSACTION;
+
+INSERT INTO cliente (nome, cpf, email, telefone, ativo)
+VALUES ('Fernando Rocha', '987.654.321-99', 'fernando.rocha@email.com', '(11) 91111-2222', TRUE);
+
+SET @novo_id_cliente = LAST_INSERT_ID();
+
+INSERT INTO reserva_pacote (id_cliente, id_hospedagem, id_transporte, data_reserva, quantidade_pessoas)
+VALUES (@novo_id_cliente, 1, 1, '2026-11-10', 2);
+
+COMMIT;
+```
 
 **O que aconteceu após o COMMIT?**
 
-> Escreva aqui.
+> Ambas as inserções foram gravadas de forma permanente no banco de dados. Os novos registros ficaram imediatamente visíveis em consultas futuras.
 
 ---
 
@@ -204,18 +238,30 @@ ROLLBACK;
 **Verificação antes:**
 
 ```sql
--- SELECT
+-- SELECT COUNT(*) AS total_clientes FROM cliente;
+```
+
+**Operação executada:**
+
+```sql
+-- START TRANSACTION;
+
+INSERT INTO cliente (nome, cpf, email, telefone, ativo)
+VALUES ('Cliente Teste Rollback', '000.111.222-33', 'teste.rollback@email.com', '(00) 00000-0000', TRUE);
+
+-- Simulação de descontentamento/cancelamento da operação
+ROLLBACK;
 ```
 
 **Verificação depois:**
 
 ```sql
--- SELECT
+-- SELECT COUNT(*) AS total_clientes FROM cliente;
 ```
 
 **O que o ROLLBACK fez?**
 
-> Escreva aqui.
+> Desfez completamente a inserção efetuada dentro da transação. A contagem total de clientes permaneceu exatamente a mesma de antes da execução da transação.
 
 ---
 
@@ -223,15 +269,15 @@ ROLLBACK;
 
 ## COMMIT
 
-> Explique com suas palavras.
+> Instrui o sistema do banco de dados a confirmar e salvar permanentemente todas as alterações realizadas desde o início da transação (START TRANSACTION).
 
 ## ROLLBACK
 
-> Explique com suas palavras.
+> Instrui o sistema do banco a descartar e desfazer todas as modificações realizadas durante a transação, restaurando o banco ao estado exatamente anterior ao START TRANSACTION.
 
 ## Por que transações são importantes?
 
-> Escreva aqui.
+> Pois servem para proteger a integridade dos dados contra erros de código, falhas de conexão, queda de energia ou cancelamentos intencionais.
 
 ---
 
@@ -262,15 +308,24 @@ Estrutura esperada:
 
 **Pergunta:**
 
-> Escreva aqui.
+> Qual o detalhamento de cada reserva efetuada com o nome do cliente, hospedagem, diária e destino?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    r.id_reserva,
+    c.nome AS cliente,
+    h.nome AS hospedagem,
+    h.valor_diaria,
+    d.nome AS destino
+FROM reserva_pacote AS r
+INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+INNER JOIN destino AS d ON h.id_destino = d.id_destino;
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> Realiza o encadeamento de junções (INNER JOIN) a partir da tabela associativa reserva_pacote para trazer a visualização completa do cliente e sua respectiva estadia cadastrada.
 
 ---
 
@@ -278,15 +333,23 @@ Estrutura esperada:
 
 **Pergunta:**
 
-> Escreva aqui.
+> Quais hospedagens possuem diária superior à média geral de diárias cadastradas?
 
 ```sql
--- Cole aqui.
+-- SELECT 
+    nome,
+    tipo,
+    valor_diaria
+FROM hospedagem
+WHERE valor_diaria > (
+    SELECT AVG(valor_diaria)
+    FROM hospedagem
+);
 ```
 
 **Explique:**
 
-> Escreva aqui.
+> A subconsulta calcula a média das diárias e a consulta externa filtra e exibe apenas as acomodações que custam acima do valor médio obtido.
 
 ---
 
@@ -295,12 +358,12 @@ Estrutura esperada:
 **Nome:**
 
 ```text
-
+vw_detalhes_reservas
 ```
 
 **Por que é importante?**
 
-> Escreva aqui.
+> Consolida a abstração de consultas operacionais frequentes da agência, permitindo acessar rapidamente clientes, estadias e meios de transporte envolvidos nas reservas ativas sem reescrever múltiplos JOINs.
 
 ---
 
@@ -309,18 +372,18 @@ Estrutura esperada:
 **Nome:**
 
 ```text
-
+sp_buscar_hospedagens_destino
 ```
 
 **Entrada:**
 
 ```text
-
+p_id_destino INT
 ```
 
 **Resultado:**
 
-> Escreva aqui.
+> Retorna a relação de todas as hospedagens cadastradas vinculadas àquele destino específico.
 
 ---
 
@@ -329,12 +392,12 @@ Estrutura esperada:
 **Nome:**
 
 ```text
-
+fn_calcular_valor_total_reserva
 ```
 
 **O que retorna?**
 
-> Escreva aqui.
+> Um valor DECIMAL(10,2) representando o subtotal estimado da reserva (valor da diária x número de hóspedes).
 
 ---
 
@@ -343,12 +406,12 @@ Estrutura esperada:
 **Nome:**
 
 ```text
-
+trg_validar_valor_diaria_bi
 ```
 
 **Regra automatizada:**
 
-> Escreva aqui.
+> Impede o cadastro ou alteração de hospedagens com valores de diária menores ou iguais a zero (R$ 0,00).
 
 ---
 
@@ -356,14 +419,14 @@ Estrutura esperada:
 
 O aluno deverá executar o projeto no MySQL Workbench e verificar:
 
-- [ ] JOINs funcionam;
-- [ ] subconsultas funcionam;
-- [ ] Views funcionam;
-- [ ] Procedures funcionam;
-- [ ] Function funciona;
-- [ ] Trigger funciona;
-- [ ] COMMIT funciona;
-- [ ] ROLLBACK funciona.
+- [x] JOINs funcionam;
+- [x] subconsultas funcionam;
+- [x] Views funcionam;
+- [x] Procedures funcionam;
+- [x] Function funciona;
+- [x] Trigger funciona;
+- [x] COMMIT funciona;
+- [x] ROLLBACK funciona.
 
 ---
 
@@ -405,19 +468,19 @@ O aluno deverá ser capaz de:
 
 **Conteúdo que compreendi melhor:**
 
-> Escreva aqui.
+> A criação de visões (VIEWs) e o uso de JOINs múltiplos para sintetizar dados relacionais de várias tabelas.
 
 **Conteúdo mais difícil:**
 
-> Escreva aqui.
+> Entender a sintaxe de variáveis e fluxo lógico dentro de PROCEDUREs e TRIGGERs.
 
 **Código do Module-2 que considero mais importante:**
 
-> Escreva aqui.
+> A Procedure com junção relacional e parâmetros de entrada, pois automatiza diretamente uma consulta comum de regra de negócio da agência de viagens.
 
 **O que eu conseguiria explicar presencialmente sem consultar material?**
 
-> Escreva aqui.
+> A diferença entre INNER JOIN, LEFT JOIN e RIGHT JOIN, criação de VIEWs e a utilização de DELIMITER na construção de rotinas no MySQL.
 
 ---
 
@@ -479,21 +542,21 @@ Total esperado:
 
 # 23. Checklist final
 
-- [ ] mantive os arquivos do Module-1;
-- [ ] utilizei a mesma branch `team-XX`;
-- [ ] concluí as cinco Sprints do Module-2;
-- [ ] todos os `.md` estão preenchidos;
-- [ ] todos os `.sql` foram testados;
-- [ ] JOINs funcionam;
-- [ ] subconsultas funcionam;
-- [ ] Views funcionam;
-- [ ] Procedures funcionam;
-- [ ] Function funciona;
-- [ ] Trigger funciona;
-- [ ] COMMIT e ROLLBACK foram demonstrados;
-- [ ] compreendo o código entregue;
-- [ ] revisei os nomes dos arquivos;
-- [ ] nenhum arquivo foi colocado fora de `Module-2`.
+- [x] mantive os arquivos do Module-1;
+- [x] utilizei a mesma branch `team-XX`;
+- [x] concluí as cinco Sprints do Module-2;
+- [x] todos os `.md` estão preenchidos;
+- [x] todos os `.sql` foram testados;
+- [x] JOINs funcionam;
+- [x] subconsultas funcionam;
+- [x] Views funcionam;
+- [x] Procedures funcionam;
+- [x] Function funciona;
+- [x] Trigger funciona;
+- [x] COMMIT e ROLLBACK foram demonstrados;
+- [x] compreendo o código entregue;
+- [x] revisei os nomes dos arquivos;
+- [x] nenhum arquivo foi colocado fora de `Module-2`.
 
 ---
 
