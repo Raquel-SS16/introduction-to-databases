@@ -41,12 +41,12 @@ O objetivo não é apenas criar rotinas que executem, mas entender:
 
 **Nome completo:**
 
-> Escreva aqui.
+> Vinícius Eduardo Lima de Assis.
 
 **Banco utilizado:**
 
 ```text
-
+pacote_viagens
 ```
 
 ---
@@ -57,10 +57,10 @@ Defina rotinas úteis ao seu sistema.
 
 | Rotina | Tipo | Entrada | Saída | Objetivo |
 |---|---|---|---|---|
-|  | Procedure |  |  |  |
-|  | Procedure |  |  |  |
-|  | Function |  |  |  |
-
+| sp_buscar_hospedagens_destino | Procedure | p_id_destino INT | Tabela de resultados | Listar todas as hospedagens cadastradas para um determinado destino |
+| sp_resumo_cliente | Procedure | p_id_cliente INT | Tabela de resultados | Exibir os dados do cliente e todas as suas reservas efetuadas com detalhes de hotel e transporte |
+| fn_calcular_valor_total_reserva | Function | p_id_reserva INT | DECIMAL(10,2) | Calcular o valor estimado do pacote (valor da diária da hospedagem x número de pessoas) |
+| fn_classificar_hospedagem | Function | p_id_hospedagem INT | VARCHAR(30) | Classificar uma hospedagem em categorias de custo ('Econômica', 'Intermediária', 'Luxo') com uso de IF/ELSE |
 ---
 
 # 3. DELIMITER
@@ -82,7 +82,7 @@ DELIMITER ;
 
 **Explique por que o `DELIMITER` é utilizado:**
 
-> Escreva aqui.
+> O DELIMITER altera temporariamente o caractere padrão que finaliza comandos no MySQL (que é o ponto e vírgula ;). Isso é essencial ao criar Procedures ou Functions, pois essas rotinas contêm múltiplos comandos SQL internos terminados em ;. Mudar o delimitador (por exemplo, para //) evita que o MySQL interprete o primeiro ; interno como o fim de toda a criação da Stored Procedure/Function.
 
 ---
 
@@ -92,29 +92,50 @@ Crie uma Procedure que receba pelo menos um parâmetro.
 
 **Objetivo:**
 
-> Escreva aqui.
+> Buscar e retornar todas as hospedagens vinculadas a um destino específico informado via ID.
 
 **Parâmetro de entrada:**
 
 ```text
-
+p_id_destino INT
 ```
 
 **SQL:**
 
 ```sql
--- Cole aqui.
+-- USE pacote_viagens;
+
+-- 1. Altera o delimitador para //
+DELIMITER //
+
+CREATE PROCEDURE sp_buscar_hospedagens_destino(
+    IN p_id_destino INT
+)
+BEGIN
+    SELECT 
+        h.id_hospedagem,
+        h.nome AS hospedagem,
+        h.tipo,
+        h.valor_diaria,
+        d.nome AS destino
+    FROM hospedagem AS h
+    INNER JOIN destino AS d ON h.id_destino = d.id_destino
+    WHERE h.id_destino = p_id_destino;
+END //
+
+-- 2. Restaura o delimitador padrão para ;
+DELIMITER ;
 ```
 
 **Execução:**
 
 ```sql
-CALL ...
+CALL sp_buscar_hospedagens_destino(2);
 ```
 
 **Resultado esperado:**
 
-> Escreva aqui.
+> Uma lista contendo todas as opções de acomodação (hotéis, pousadas) cadastradas para o destino de ID 1 (Fernando de Noronha).
 
 ---
 
@@ -135,16 +156,40 @@ listar produtos de determinada categoria
 
 **Objetivo:**
 
-> Escreva aqui.
+> Listar o histórico completo e detalhado das reservas ativas efetuadas por um determinado cliente.
 
 ```sql
--- Cole aqui.
+-- USE pacote_viagens;
+
+-- 1. Altera o delimitador para //
+DELIMITER //
+
+CREATE PROCEDURE sp_resumo_cliente(
+    IN p_id_cliente INT
+)
+BEGIN
+    SELECT 
+        c.nome AS cliente,
+        r.id_reserva,
+        r.data_reserva,
+        r.quantidade_pessoas,
+        h.nome AS hospedagem,
+        t.empresa AS transporte
+    FROM reserva_pacote AS r
+    INNER JOIN cliente AS c ON r.id_cliente = c.id_cliente
+    INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+    INNER JOIN transporte AS t ON r.id_transporte = t.id_transporte
+    WHERE c.id_cliente = p_id_cliente;
+END //
+
+-- 2. Restaura o delimitador padrão para ;
+DELIMITER ;
 ```
 
 **Execução:**
 
 ```sql
-CALL ...
+CALL sp_resumo_cliente(1);
 ```
 
 ---
@@ -175,7 +220,26 @@ SELECT @total;
 **SQL do seu projeto:**
 
 ```sql
--- Cole aqui.
+-- USE pacote_viagens;
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS sp_contar_reservas_cliente //
+
+CREATE PROCEDURE sp_contar_reservas_cliente(
+    IN p_id_cliente INT,
+    OUT p_total_reservas INT
+)
+BEGIN
+    SELECT COUNT(*) INTO p_total_reservas
+    FROM reserva_pacote
+    WHERE id_cliente = p_id_cliente;
+END //
+
+DELIMITER ;
+
+CALL sp_contar_reservas_cliente(1, @total);
+SELECT @total AS total_reservas_cliente;
 ```
 
 Caso não seja aplicável, justifique:
@@ -203,30 +267,63 @@ END;
 
 **Objetivo:**
 
-> Escreva aqui.
+> Calcular o valor estimado por diária da reserva multiplicando a quantidade de pessoas pelo valor unitário da diária da hospedagem associada.
 
 **Parâmetro recebido:**
 
 ```text
-
+p_id_reserva INT
 ```
 
 **Valor retornado:**
 
 ```text
-
+DECIMAL(10,2)
 ```
 
 **SQL:**
 
 ```sql
--- Cole aqui.
+-- USE pacote_viagens;
+
+DELIMITER //
+
+DROP FUNCTION IF EXISTS fn_calcular_valor_total_reserva //
+
+CREATE FUNCTION fn_calcular_valor_total_reserva(
+    p_id_reserva INT
+)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE v_valor_diaria DECIMAL(10,2);
+    DECLARE v_qtd_pessoas INT;
+    DECLARE v_total DECIMAL(10,2);
+
+    SELECT h.valor_diaria, r.quantidade_pessoas
+    INTO v_valor_diaria, v_qtd_pessoas
+    FROM reserva_pacote AS r
+    INNER JOIN hospedagem AS h ON r.id_hospedagem = h.id_hospedagem
+    WHERE r.id_reserva = p_id_reserva;
+
+    SET v_total = v_valor_diaria * v_qtd_pessoas;
+
+    RETURN v_total;
+END //
+
+DELIMITER ;
 ```
 
 **Exemplo de uso:**
 
 ```sql
-SELECT nome_funcao(...);
+SELECT 
+    id_reserva, 
+    id_cliente, 
+    fn_calcular_valor_total_reserva(id_reserva) AS subtotal_calculado
+FROM reserva_pacote
+WHERE id_reserva = 1;
 ```
 
 ---
@@ -247,10 +344,50 @@ END IF;
 
 **Regra de negócio implementada:**
 
-> Escreva aqui.
+> Classificar a hospedagem em faixas de preço de diária: 'Econômica' (diária até R$ 700,00), 'Intermediária' (diária de R$ 700,01 a R$ 1.500,00) ou 'Alto Padrão / Luxo' (diária acima de R$ 1.500,00).
 
 ```sql
--- Cole aqui.
+-- USE pacote_viagens;
+
+DELIMITER //
+
+DROP FUNCTION IF EXISTS fn_classificar_hospedagem //
+
+CREATE FUNCTION fn_classificar_hospedagem(
+    p_id_hospedagem INT
+)
+RETURNS VARCHAR(30)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE v_valor DECIMAL(10,2);
+    DECLARE v_categoria VARCHAR(30);
+
+    SELECT valor_diaria INTO v_valor
+    FROM hospedagem
+    WHERE id_hospedagem = p_id_hospedagem;
+
+    IF v_valor IS NULL THEN
+        SET v_categoria = 'Não Encontrada';
+    ELSEIF v_valor <= 700.00 THEN
+        SET v_categoria = 'Econômica';
+    ELSEIF v_valor <= 1500.00 THEN
+        SET v_categoria = 'Intermediária';
+    ELSE
+        SET v_categoria = 'Alto Padrão / Luxo';
+    END IF;
+
+    RETURN v_categoria;
+END //
+
+DELIMITER ;
+
+SELECT 
+    id_hospedagem,
+    nome,              
+    valor_diaria,
+    fn_classificar_hospedagem(id_hospedagem) AS categoria
+FROM hospedagem;
 ```
 
 ---
@@ -261,15 +398,15 @@ Explique com suas palavras.
 
 ## Procedure
 
-> Escreva aqui.
+> É um conjunto encapsulado de instruções SQL executado através do comando CALL. Pode receber parâmetros de entrada (IN), parâmetros de saída (OUT) e manipular registros no banco de dados. Não necessita retornar um valor único e pode retornar múltiplos conjuntos de dados (tabelas) na tela.
 
 ## Function
 
-> Escreva aqui.
+> É uma estrutura que tem como finalidade calcular e retornar obrigatoriamente um único valor escalar (número, texto, data) via instrução RETURN. Pode ser invocada diretamente em expressões dentro de seleções (SELECT), cláusulas de filtro (WHERE) ou ordenação (ORDER BY).
 
 ## Quando você utilizaria cada uma no seu projeto?
 
-> Escreva aqui.
+> Utilizaria Procedures para ações operacionais do sistema, como buscar o resumo do cliente, emitir relatórios de reserva ou processar cancelamentos. Utilizaria Functions para cálculos numéricos e transformações reutilizáveis diretamente dentro das consultas SELECT, tais como calcular o total estimado de uma reserva ou categorizar estadias pelo preço.
 
 ---
 
@@ -280,35 +417,35 @@ Para cada rotina, execute pelo menos dois testes com parâmetros diferentes.
 ## Procedure 1
 
 ```sql
-CALL ...;
-CALL ...;
+CALL sp_buscar_hospedagens_destino(1);
+CALL sp_buscar_hospedagens_destino(2);
 ```
 
 **Resultados:**
 
-> Escreva aqui.
+> O primeiro CALL retornou a Pousada Zé Maria cadastrada para o destino de Fernando de Noronha (ID 1). O segundo CALL retornou o Hotel Colline de France cadastrado para o destino de Gramado (ID 2).
 
 ## Procedure 2
 
 ```sql
-CALL ...;
-CALL ...;
+CALL sp_resumo_cliente(1);
+CALL sp_resumo_cliente(3);
 ```
 
 **Resultados:**
 
-> Escreva aqui.
+> O primeiro CALL exibiu a reserva ativa do cliente Carlos Silva. O segundo exibiu a reserva ativa do cliente Roberto Santos.
 
 ## Function
 
 ```sql
-SELECT ...;
-SELECT ...;
+SELECT fn_calcular_valor_total_reserva(1) AS total_reserva_1;
+SELECT fn_calcular_valor_total_reserva(3) AS total_reserva_3;
 ```
 
 **Resultados:**
 
-> Escreva aqui.
+> O primeiro SELECT retornou 2400.00 (R$ 1.200,00 x 2 pessoas). O segundo SELECT retornou 2600.00 (R$ 650,00 x 4 pessoas).
 
 ---
 
@@ -325,11 +462,24 @@ Escolha uma rotina e prepare-se para:
 **Rotina escolhida:**
 
 ```text
-
+sp_buscar_hospedagens_destino
 ```
 
 ```sql
--- Cole aqui.
+-- CREATE PROCEDURE sp_buscar_hospedagens_destino(
+    IN p_id_destino INT
+)
+BEGIN
+    SELECT 
+        h.id_hospedagem,
+        h.nome AS hospedagem,
+        h.tipo,
+        h.valor_diaria,
+        d.nome AS destino
+    FROM hospedagem AS h
+    INNER JOIN destino AS d ON h.id_destino = d.id_destino
+    WHERE h.id_destino = p_id_destino;
+END //
 ```
 
 ---
@@ -383,9 +533,7 @@ DELIMITER ;
 
 | Problema | Causa | Solução |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Erro 1064: Syntax Error perto da palavra END | Executar o comando sem alterar o delimitador com DELIMITER // | Incluir DELIMITER // antes do CREATE e DELIMITER ; ao final |
 
 ---
 
@@ -407,18 +555,18 @@ COMPREENDER
 
 # 16. Checklist
 
-- [ ] utilizei o banco do projeto;
-- [ ] compreendi o uso do `DELIMITER`;
-- [ ] criei pelo menos 2 Procedures;
-- [ ] criei uma Function;
-- [ ] utilizei parâmetro `IN`;
-- [ ] utilizei `OUT` quando aplicável;
-- [ ] utilizei `IF/ELSE`;
-- [ ] testei cada rotina;
-- [ ] executei parâmetros diferentes;
-- [ ] consigo explicar todas as rotinas;
-- [ ] salvei `SPRINT4-5.md`;
-- [ ] salvei `SPRINT4-5.sql`.
+- [x] utilizei o banco do projeto;
+- [x] compreendi o uso do `DELIMITER`;
+- [x] criei pelo menos 2 Procedures;
+- [x] criei uma Function;
+- [x] utilizei parâmetro `IN`;
+- [x] utilizei `OUT` quando aplicável;
+- [x] utilizei `IF/ELSE`;
+- [x] testei cada rotina;
+- [x] executei parâmetros diferentes;
+- [x] consigo explicar todas as rotinas;
+- [x] salvei `SPRINT4-5.md`;
+- [x] salvei `SPRINT4-5.sql`.
 
 ---
 
